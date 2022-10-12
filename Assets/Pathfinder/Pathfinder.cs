@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Pathfinder : BaseGridRenderer
+public class Pathfinder : MonoBehaviour
 {
     [Header("Tilemap")]
     public Tilemap tilemap;
@@ -16,13 +16,13 @@ public class Pathfinder : BaseGridRenderer
     public GameObject sphere;
     public float lineWidth = 0.1f;
 
+    private IGrid grid;
     private Tile paintTile;
 
     // Start is called before the first frame update
-    public override void Start()
+    public void Start()
     {
-        base.Start();
-        Grid = new TransformModifier(
+        grid = new TransformModifier(
             new SquareGrid(1),
             // Resize the grid isometrically.
             Matrix4x4.Translate(new Vector3(0, 0.3333f - 0.25f, 0)) * 
@@ -43,7 +43,7 @@ public class Pathfinder : BaseGridRenderer
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         var origin = transform.worldToLocalMatrix.MultiplyPoint3x4(ray.origin);
         var direction = transform.worldToLocalMatrix.MultiplyVector(ray.direction);
-        var h = Grid.Raycast(origin, direction).Cast<RaycastInfo?>().FirstOrDefault();
+        var h = grid.Raycast(origin, direction).Cast<RaycastInfo?>().FirstOrDefault();
         var currentCell = h?.cell;
 
         // If hit
@@ -54,7 +54,7 @@ public class Pathfinder : BaseGridRenderer
             {
                 return tilemap.GetTile((Vector3Int)cell) != null;
             }
-            var path = Pathfinding.FindPath(Grid, new Cell(0, 0), currentCell.Value, isAccessible);
+            var path = Pathfinding.FindPath(grid, new Cell(0, 0), currentCell.Value, isAccessible);
 
             // Draw the path
             if (path != null)
@@ -64,7 +64,7 @@ public class Pathfinder : BaseGridRenderer
                 var positions = new List<Vector3>();
                 foreach (var cell in path.Cells)
                 {
-                    var v = Grid.GetCellCenter(cell);
+                    var v = grid.GetCellCenter(cell);
                     positions.Add(v);
                 }
                 lineRender.SetPositions(positions.ToArray());
@@ -74,8 +74,8 @@ public class Pathfinder : BaseGridRenderer
                 // Draw a path as a series of cylinders
                 foreach (var step in path.Steps)
                 {
-                    var start = Grid.GetCellCenter(step.Src);
-                    var end = Grid.GetCellCenter(step.Dest);
+                    var start = grid.GetCellCenter(step.Src);
+                    var end = grid.GetCellCenter(step.Dest);
                     var c = Instantiate(cylinder, transform);
                     c.transform.position = (start + end) / 2;
                     c.transform.rotation = Quaternion.FromToRotation(Vector3.up, end - start);
@@ -99,12 +99,4 @@ public class Pathfinder : BaseGridRenderer
             }
         }
     }
-
-    protected override void OnRenderObject()
-    {
-        //base.OnRenderObject();
-    }
-
-    protected override Color? CellColor(Cell cell) => null;
-    protected override Color? CellOutline(Cell cell) => null;
 }
