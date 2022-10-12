@@ -73,7 +73,7 @@ public class BaseGridRenderer : MonoBehaviour
         GL.End();
     }
 
-    private void OnRenderObject()
+    protected virtual void OnRenderObject()
     {
         if (Grid == null)
             return;
