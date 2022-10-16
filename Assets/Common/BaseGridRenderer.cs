@@ -46,31 +46,72 @@ public class BaseGridRenderer : MonoBehaviour
 
     private void DrawCellSolid(Cell cell, Color color)
     {
-        Grid.GetPolygon(cell, out var vertices, out var transform);
-        GL.Begin(GL.TRIANGLES);
-        GL.Color(color);
-        for (var i = 2; i < vertices.Length; i++)
+        if (Grid.Is3D)
         {
-            GL.Vertex(transform.MultiplyPoint3x4(vertices[0]));
-            GL.Vertex(transform.MultiplyPoint3x4(vertices[i]));
-            GL.Vertex(transform.MultiplyPoint3x4(vertices[i - 1]));
+            var md = Grid.GetMeshData(cell);
+            GL.Begin(GL.TRIANGLES);
+            GL.Color(color);
+            var vertices = md.vertices;
+            foreach (var face in MeshUtils.GetFaces(md, 0))
+            {
+                for (var i = 2; i < face.Length; i++)
+                {
+                    GL.Vertex(vertices[face[0]]);
+                    GL.Vertex(vertices[face[i]]);
+                    GL.Vertex(vertices[face[i - 1]]);
+                }
+            }
+            GL.End();
         }
-        GL.End();
+        else 
+        {
+            var vertices = Grid.GetPolygon(cell);
+            GL.Begin(GL.TRIANGLES);
+            GL.Color(color);
+            for (var i = 2; i < vertices.Length; i++)
+            {
+                GL.Vertex(vertices[0]);
+                GL.Vertex(vertices[i]);
+                GL.Vertex(vertices[i - 1]);
+            }
+            GL.End();
+        }
     }
 
     private void DrawCellOutline(Cell cell, Color color)
     {
-        Grid.GetPolygon(cell, out var vertices, out var transform);
-        GL.Begin(GL.LINES);
-        GL.Color(color);
-        for (var i = 0; i < vertices.Length; i++)
+        if (Grid.Is3D)
         {
-            GL.Vertex(transform.MultiplyPoint3x4(vertices[(i == 0 ? vertices.Length : i) - 1]));
-            GL.Vertex(transform.MultiplyPoint3x4(vertices[i]));
+            var md = Grid.GetMeshData(cell);
+            GL.Begin(GL.LINES);
+            GL.Color(color);
+            var vertices = md.vertices;
+            foreach (var face in MeshUtils.GetFaces(md, 0))
+            {
+                for (var i = 0; i < face.Length; i++)
+                {
+                    GL.Vertex(vertices[face[(i == 0 ? face.Length : i) - 1]]);
+                    GL.Vertex(vertices[face[i]]);
+                }
+                GL.Vertex(vertices[face[face.Length - 1]]);
+                GL.Vertex(vertices[face[0]]);
+            }
+            GL.End();
         }
-        GL.Vertex(transform.MultiplyPoint3x4(vertices[vertices.Length - 1]));
-        GL.Vertex(transform.MultiplyPoint3x4(vertices[0]));
-        GL.End();
+        else
+        {
+            var vertices = Grid.GetPolygon(cell);
+            GL.Begin(GL.LINES);
+            GL.Color(color);
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                GL.Vertex(vertices[(i == 0 ? vertices.Length : i) - 1]);
+                GL.Vertex(vertices[i]);
+            }
+            GL.Vertex(vertices[vertices.Length - 1]);
+            GL.Vertex(vertices[0]);
+            GL.End();
+        }
     }
 
     protected virtual void OnRenderObject()
@@ -81,14 +122,14 @@ public class BaseGridRenderer : MonoBehaviour
         GL.PushMatrix();
         GL.MultMatrix(transform.localToWorldMatrix);
         solidMaterial.SetPass(0);
-        foreach (var cell in Grid.GetCells())
+        foreach (var cell in GetCells())
         {
             if(CellColor(cell) is Color color)
                 DrawCellSolid(cell, color);
         }
 
         outlineMaterial.SetPass(0);
-        foreach (var cell in Grid.GetCells())
+        foreach (var cell in GetCells())
         {
             if (CellOutline(cell) is Color color)
                 DrawCellOutline(cell, color);
@@ -96,6 +137,38 @@ public class BaseGridRenderer : MonoBehaviour
 
         GL.PopMatrix();
     }
+
+    protected virtual IEnumerable<Cell> GetCells()
+    {
+        if(Grid.IsPlanar)
+        {
+            // Restrict to just visible cells.
+            // Works even for infinite grids
+            var viewportPoints = new[] { new Vector3(0, 0), new Vector3(0, 1), new Vector3(1, 1), new Vector3(1, 0) };
+            var localPoints = new List<Vector3>();
+            foreach(var viewportPoint in viewportPoints)
+            {
+                var ray = Camera.current.ViewportPointToRay(viewportPoint);
+                var worldPoint = ray.origin + ray.direction * (-ray.origin.z / ray.direction.z);
+                var localPoint = transform.InverseTransformPoint(worldPoint);
+                localPoints.Add(localPoint);
+            }
+            var min = localPoints.Aggregate(Vector3.Min);
+            var max = localPoints.Aggregate(Vector3.Max);
+            return Grid.GetCellsIntersectsApprox(min, max)
+                // Stop unity from crashing, just give up!
+                .Take(100000);
+        }
+        else if(Grid.IsFinite)
+        {
+            return Grid.GetCells();
+        }
+        else
+        {
+            throw new System.Exception("Cannot get cells of infinite grid.");
+        }
+    }
+
     protected virtual Color? CellColor(Cell cell) => Color.white;
 
     protected virtual Color? CellOutline(Cell cell) => Color.black;
