@@ -8,35 +8,56 @@ using UnityEngine;
 //[ExecuteAlways]
 public class CellPicker : BaseGridRenderer
 {
+    // Configuration
     public Mesh mesh;
     public float layerHeight = 1;
 
-    private Cell? selectedCell;
+    public GameObject triangle;
 
-    // Indexed by dual cell.x
-    private Dictionary<int, int> heights;
+    MeshGrid primalMeshGrid;
+    MeshPrismGrid primalMeshPrismGrid;
+    MeshGrid dualMeshGrid;
+    MeshPrismGrid dualMeshPrismGrid;
+
+    // Indexed by mesh vertices (i.e. dual cell.x)
+    private Dictionary<int, int> terrain;
+
+    // Editor state
+    private Cell? selectedCell;
 
     public override void Start()
     {
         base.Start();
 
         var primalMeshData = new MeshData(mesh);
-        var primalMeshGrid = new MeshGrid(primalMeshData);
+        primalMeshGrid = new MeshGrid(primalMeshData, new MeshGridOptions
+        {
+            // Make Sylves work closer to Unity's Y-up convention.
+            UseXZPlane = true,
+        });
+        primalMeshPrismGrid = new MeshPrismGrid(primalMeshData, new MeshPrismGridOptions
+        {
+            LayerHeight = 0.1f,
+            LayerOffset = -0.15f,
+            UseXZPlane = true,
+        });
 
         var dualMeshData = MakeDual(primalMeshData, primalMeshGrid);
         dualMeshData.RecalculateNormals();
-        var dualMeshGrid = new MeshGrid(dualMeshData);
-
-        heights = dualMeshGrid.GetCells().ToDictionary(cell => cell.x, _ => 0);
-
-        Grid = new MeshPrismGrid(dualMeshData, new MeshPrismGridOptions
+        dualMeshGrid = new MeshGrid(dualMeshData, new MeshGridOptions
         {
-            MinLayer = 0,
-            MaxLayer = 1,
-            LayerHeight = 0.3f,
-            LayerOffset = 3f,
+            UseXZPlane = true,
+        });
+        dualMeshPrismGrid = new MeshPrismGrid(dualMeshData, new MeshPrismGridOptions
+        {
+            LayerHeight = 0.1f,
+            LayerOffset = -0.15f,
+            UseXZPlane = true,
         });
 
+        terrain = dualMeshGrid.GetCells().ToDictionary(cell => cell.x, _ => 0);
+
+        Grid = dualMeshGrid;
     }
 
     private void Update()
@@ -45,14 +66,7 @@ public class CellPicker : BaseGridRenderer
         var origin = transform.worldToLocalMatrix.MultiplyPoint3x4(ray.origin);
         var direction= transform.worldToLocalMatrix.MultiplyVector(ray.direction);
 
-        //origin = new Vector3(-0.6740497f, 9.531415f, - 1.921084f);
-        //direction = new Vector3(-0.04277391f, - 0.937008f, 0.3466791f);
-
-
-        Debug.Log($"ray {origin.x} {origin.y} {origin.z} {direction.x} {direction.y} {direction.z}");
-
         var h = Grid.Raycast(origin, direction)
-            //.Where(r => r.cell.y <= heights[r.cell.x])
             .Cast<RaycastInfo?>()
             .FirstOrDefault();
 
@@ -60,27 +74,43 @@ public class CellPicker : BaseGridRenderer
 
         if (h != null)
         {
-            Debug.Log(selectedCell);
-
             var x = h.Value.cell.x;
+            var i = 0;
             if(Input.GetMouseButtonDown(0))
             {
-                heights[x] = Mathf.Max(5, heights[x] + 1);
+                i = 1;
             }
             if (Input.GetMouseButtonDown(1))
             {
-                heights[x] = Mathf.Min(0, heights[x] - 1);
+                i = -1;
             }
+            if (i != 0)
+            {
+                terrain[x] = (terrain[x] + i) % 3;
+                Regen();
+            }
+        }
+    }
+
+
+    private void Regen()
+    {
+        foreach(Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach(var cell in primalMeshPrismGrid.GetCells())
+        {
+            var go = Instantiate(triangle, transform);
+            go.name = $"{triangle.name} {cell}";
+            var deformation = primalMeshPrismGrid.GetDeformation(cell);
+            var meshFilter = go.GetComponent<MeshFilter>();
+            meshFilter.mesh = deformation.Deform(meshFilter.mesh);
         }
     }
 
     protected override Color? CellColor(Cell cell)
     {
-        if(selectedCell != null)
-        {
-            return Grid.GetNeighbours(selectedCell.Value).Contains(cell)? Color.red : null;
-        }
-
         return cell == selectedCell ? Color.red : null;
     }
 

@@ -325,7 +325,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2140394163}
-  m_LocalRotation: {x: 0.19105545, y: -0.635477, z: 0.7189987, w: -0.20665844}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -347,3 +347,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mesh: {fileID: -2432090755550338912, guid: f7d3858a68eb2a64da1050feced74553, type: 3}
   layerHeight: 1
+  triangle: {fileID: 2979378259982405529, guid: 6518d67f6fcddf449b99afa205985726, type: 3}
