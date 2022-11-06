@@ -293,8 +293,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.12577128, y: 0.056805953, z: -0.0071525546, w: -0.99040574}
+  m_LocalPosition: {x: 0.2648789, y: 0.5979289, z: -2.3011436}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -347,4 +347,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mesh: {fileID: -2432090755550338912, guid: f7d3858a68eb2a64da1050feced74553, type: 3}
   layerHeight: 1
-  triangle: {fileID: 2979378259982405529, guid: 6518d67f6fcddf449b99afa205985726, type: 3}
+  terrainCount: 3
+  terrainTiles:
+  - terrain1: 0
+    terrain2: 0
+    terrain3: 0
+    gameObject: {fileID: 2979378259982405529, guid: 6518d67f6fcddf449b99afa205985726, type: 3}
+  - terrain1: 0
+    terrain2: 0
+    terrain3: 1
+    gameObject: {fileID: 2979378259982405529, guid: 8ca954177c7b0424ea88c92390c8ca9e, type: 3}
+  - terrain1: 1
+    terrain2: 1
+    terrain3: 0
+    gameObject: {fileID: 2979378259982405529, guid: 6b1ca4c96b685554989000723ee92a7b, type: 3}
+  - terrain1: 1
+    terrain2: 1
+    terrain3: 1
+    gameObject: {fileID: 2979378259982405529, guid: 3aa796c214b46cc44ba5c67f3d9e1425, type: 3}
+  - terrain1: 0
+    terrain2: 0
+    terrain3: 2
+    gameObject: {fileID: 2979378259982405529, guid: 3601b2c7829510e4eb3f14f2c2297945, type: 3}
+  - terrain1: 2
+    terrain2: 2
+    terrain3: 0
+    gameObject: {fileID: 2979378259982405529, guid: cdf082b3ea604ad4fb8716abb733185c, type: 3}
+  - terrain1: 2
+    terrain2: 2
+    terrain3: 2
+    gameObject: {fileID: 2979378259982405529, guid: 2a841bb895f1cce4dad7f56dd1ccafeb, type: 3}
+  - terrain1: 1
+    terrain2: 1
+    terrain3: 2
+    gameObject: {fileID: 2979378259982405529, guid: 651d7206189a3a344bc597b3f054f068, type: 3}
+  - terrain1: 0
+    terrain2: 2
+    terrain3: 1
+    gameObject: {fileID: 2979378259982405529, guid: cdc523ae4c2648643ba16b09e7ed8243, type: 3}
+  - terrain1: 2
+    terrain2: 0
+    terrain3: 1
+    gameObject: {fileID: 2979378259982405529, guid: 4d29439a808c3b94d86d3327427509e4, type: 3}
+  - terrain1: 2
+    terrain2: 2
+    terrain3: 1
+    gameObject: {fileID: 2979378259982405529, guid: 593c6ae674503734dae894373b996a14, type: 3}

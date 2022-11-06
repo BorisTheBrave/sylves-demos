@@ -5,6 +5,15 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+[System.Serializable]
+public class TerrainTile
+{
+    public int terrain1;
+    public int terrain2;
+    public int terrain3;
+    public GameObject gameObject;
+}
+
 //[ExecuteAlways]
 public class CellPicker : BaseGridRenderer
 {
@@ -12,12 +21,15 @@ public class CellPicker : BaseGridRenderer
     public Mesh mesh;
     public float layerHeight = 1;
 
-    public GameObject triangle;
+    public int terrainCount = 2;
+
+    public TerrainTile[] terrainTiles;
 
     MeshGrid primalMeshGrid;
     MeshPrismGrid primalMeshPrismGrid;
     MeshGrid dualMeshGrid;
     MeshPrismGrid dualMeshPrismGrid;
+    IDictionary<Cell, List<Cell>> primalCellToDualCells;
 
     // Indexed by mesh vertices (i.e. dual cell.x)
     private Dictionary<int, int> terrain;
@@ -42,7 +54,7 @@ public class CellPicker : BaseGridRenderer
             UseXZPlane = true,
         });
 
-        var dualMeshData = MakeDual(primalMeshData, primalMeshGrid);
+        var (dualMeshData, primalFaceToDualFace) = MakeDual(primalMeshData, primalMeshGrid);
         dualMeshData.RecalculateNormals();
         dualMeshGrid = new MeshGrid(dualMeshData, new MeshGridOptions
         {
@@ -54,6 +66,8 @@ public class CellPicker : BaseGridRenderer
             LayerOffset = -0.15f,
             UseXZPlane = true,
         });
+
+        primalCellToDualCells = primalFaceToDualFace.ToDictionary(x => new Cell(x.Key, 0), x => x.Value.Select(y => new Cell(y, 0)).ToList());
 
         terrain = dualMeshGrid.GetCells().ToDictionary(cell => cell.x, _ => 0);
 
@@ -86,12 +100,32 @@ public class CellPicker : BaseGridRenderer
             }
             if (i != 0)
             {
-                terrain[x] = (terrain[x] + i) % 3;
+                terrain[x] = (terrain[x] + i) % terrainCount;
                 Regen();
             }
         }
     }
 
+    private (GameObject, Matrix4x4) FindTileAndRotation(int terrain1, int terrain2, int terrain3)
+    {
+        foreach(var tt in terrainTiles)
+        {
+            if (tt.terrain1 == terrain1 && tt.terrain2 == terrain2 && tt.terrain3 == terrain3)
+            {
+                return (tt.gameObject, Matrix4x4.identity);
+            }
+            if (tt.terrain1 == terrain2 && tt.terrain2 == terrain3 && tt.terrain3 == terrain1)
+            {
+                return (tt.gameObject, Matrix4x4.Rotate(Quaternion.Euler(0, 120, 0)));
+            }
+            if (tt.terrain1 == terrain3 && tt.terrain2 == terrain1 && tt.terrain3 == terrain2)
+            {
+                return (tt.gameObject, Matrix4x4.Rotate(Quaternion.Euler(0, -120, 0)));
+            }
+        }
+        Debug.Log($"No tile found for terrains {terrain1}, {terrain2}, {terrain3}");
+        return (null, Matrix4x4.identity);
+    }
 
     private void Regen()
     {
@@ -101,9 +135,13 @@ public class CellPicker : BaseGridRenderer
         }
         foreach(var cell in primalMeshPrismGrid.GetCells())
         {
+            var terrains = primalCellToDualCells[cell].Select(x => terrain[x.x]).ToList();
+            var (triangle, rotation) = FindTileAndRotation(terrains[1], terrains[2], terrains[0]);
+            if (triangle == null)
+                continue;
             var go = Instantiate(triangle, transform);
-            go.name = $"{triangle.name} {cell}";
-            var deformation = primalMeshPrismGrid.GetDeformation(cell);
+            go.name = $"{triangle.name} {cell} {string.Join(",", terrains)}";
+            var deformation = primalMeshPrismGrid.GetDeformation(cell) * rotation;
             var meshFilter = go.GetComponent<MeshFilter>();
             meshFilter.mesh = deformation.Deform(meshFilter.mesh);
         }
@@ -116,7 +154,7 @@ public class CellPicker : BaseGridRenderer
 
     // This is a fairly simple implementation, I'm still working on a robust version to put in
     // Sylves
-    private static MeshData MakeDual(MeshData primalMeshData, MeshGrid primalMeshGrid = null)
+    private static (MeshData meshData, Dictionary<int, int[]> primalFaceToDualFace) MakeDual(MeshData primalMeshData, MeshGrid primalMeshGrid = null)
     {
         primalMeshGrid = primalMeshGrid ?? new MeshGrid(primalMeshData);
 
@@ -133,6 +171,8 @@ public class CellPicker : BaseGridRenderer
         }
         var visited = new bool[indices.Length];
         var dualIndices = new List<int>();
+        var primalFaceToDualFace = primalMeshGrid.GetCells().ToDictionary(x => x.x, x => new int[3]);
+        int face = 0;
         for (var i = 0; i < indices.Length; i++)
         {
             if (visited[i])
@@ -143,6 +183,7 @@ public class CellPicker : BaseGridRenderer
             do
             {
                 visited[tri * 3 + dir] = true;
+                primalFaceToDualFace[tri][(int)dir] = face;
                 dualIndices.Add(tri);
                 if (!baseGrid.TryMove(new Cell(tri, 0), (CellDir)dir, out var dest, out var inverseDir, out var _))
                     throw new System.Exception();
@@ -151,6 +192,7 @@ public class CellPicker : BaseGridRenderer
             }
             while (tri != origTri);
             dualIndices[dualIndices.Count - 1] = ~dualIndices[dualIndices.Count - 1];
+            face++;
         }
         var meshData = new MeshData
         {
@@ -159,6 +201,6 @@ public class CellPicker : BaseGridRenderer
             subMeshCount = 1,
             topologies = new[] { Sylves.MeshTopology.NGon },
         };
-        return meshData;
+        return (meshData, primalFaceToDualFace);
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9167605493403346408}
   - component: {fileID: 5628473410114470268}
   m_Layer: 0
-  m_Name: flat
+  m_Name: oog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40,7 +40,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2979378259982405529}
-  m_Mesh: {fileID: 4696643130194549948, guid: 66ecc06fe42dd2542adb4de9a6b94f05, type: 3}
+  m_Mesh: {fileID: 3165255403862457371, guid: ed8b2a6b39e3e58469ab87014dcc5d92, type: 3}
 --- !u!23 &5628473410114470268
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -61,7 +61,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: 66ecc06fe42dd2542adb4de9a6b94f05, type: 3}
+  - {fileID: -6478536213147159724, guid: 6085e6e7f815d3745b3896826e6d4790, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
