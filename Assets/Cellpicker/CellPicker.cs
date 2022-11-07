@@ -19,7 +19,7 @@ public class CellPicker : BaseGridRenderer
 {
     // Configuration
     public Mesh mesh;
-    public float layerHeight = 1;
+    public Color highlightColor;
 
     public int terrainCount = 2;
 
@@ -72,6 +72,8 @@ public class CellPicker : BaseGridRenderer
         terrain = dualMeshGrid.GetCells().ToDictionary(cell => cell.x, _ => 0);
 
         Grid = dualMeshGrid;
+
+        Regen();
     }
 
     private void Update()
@@ -100,7 +102,7 @@ public class CellPicker : BaseGridRenderer
             }
             if (i != 0)
             {
-                terrain[x] = (terrain[x] + i) % terrainCount;
+                terrain[x] = (terrain[x] + i + terrainCount) % terrainCount;
                 Regen();
             }
         }
@@ -149,7 +151,12 @@ public class CellPicker : BaseGridRenderer
 
     protected override Color? CellColor(Cell cell)
     {
-        return cell == selectedCell ? Color.red : null;
+        return cell == selectedCell ? highlightColor : null;
+    }
+
+    protected override Color? CellOutline(Cell cell)
+    {
+        return cell == selectedCell ? Color.black : null;
     }
 
     // This is a fairly simple implementation, I'm still working on a robust version to put in
