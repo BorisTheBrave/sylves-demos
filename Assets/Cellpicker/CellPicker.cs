@@ -36,6 +36,7 @@ public class CellPicker : BaseGridRenderer
 
     // Editor state
     private Cell? selectedCell;
+    private int? currentlyPainting;
 
     public override void Start()
     {
@@ -91,18 +92,21 @@ public class CellPicker : BaseGridRenderer
         if (h != null)
         {
             var x = h.Value.cell.x;
-            var i = 0;
             if(Input.GetMouseButtonDown(0))
             {
-                i = 1;
+                currentlyPainting = (terrain[x] + 1) % terrainCount;
             }
-            if (Input.GetMouseButtonDown(1))
+            else if (Input.GetMouseButtonDown(1))
             {
-                i = -1;
+                currentlyPainting = (terrain[x] - 1 + terrainCount) % terrainCount;
             }
-            if (i != 0)
+            else if (!Input.GetMouseButton(0) && !Input.GetMouseButton(1))
             {
-                terrain[x] = (terrain[x] + i + terrainCount) % terrainCount;
+                currentlyPainting = null;
+            }
+            if (currentlyPainting != null && terrain[x] != currentlyPainting)
+            {
+                terrain[x] = currentlyPainting.Value;
                 Regen();
             }
         }
