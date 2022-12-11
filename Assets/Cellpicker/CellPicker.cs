@@ -38,11 +38,10 @@ public class CellPicker : BaseGridRenderer
     private Cell? selectedCell;
     private int? currentlyPainting;
 
-    public override void Start()
+    public void SetSize(int size)
     {
-        base.Start();
-
         var primalMeshData = new MeshData(mesh);
+
         primalMeshGrid = new MeshGrid(primalMeshData, new MeshGridOptions
         {
             // Make Sylves work closer to Unity's Y-up convention.
@@ -75,6 +74,12 @@ public class CellPicker : BaseGridRenderer
         Grid = dualMeshGrid;
 
         Regen();
+    }
+
+    public override void Start()
+    {
+        base.Start();
+        SetSize(0);
     }
 
     private void Update()
