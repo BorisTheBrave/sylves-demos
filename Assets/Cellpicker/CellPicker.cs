@@ -41,6 +41,7 @@ public class CellPicker : BaseGridRenderer
     public void SetSize(int size)
     {
         var primalMeshData = new MeshData(mesh);
+        //primalMeshData = ConwayOperators.Kis(primalMeshData);
 
         primalMeshGrid = new MeshGrid(primalMeshData, new MeshGridOptions
         {
@@ -54,7 +55,7 @@ public class CellPicker : BaseGridRenderer
             UseXZPlane = true,
         });
 
-        var (dualMeshData, primalFaceToDualFace) = MakeDual(primalMeshData, primalMeshGrid);
+        var (dualMeshData, primalFaceToDualFace) = MakeDual(primalMeshData);
         dualMeshData.RecalculateNormals();
         dualMeshGrid = new MeshGrid(dualMeshData, new MeshGridOptions
         {
@@ -147,11 +148,8 @@ public class CellPicker : BaseGridRenderer
         foreach(var cell in primalMeshPrismGrid.GetCells())
         {
             var terrains = primalCellToDualCells[cell].Select(x => terrain[x.x]).ToList();
-            var (triangle, rotation) = FindTileAndRotation(terrains[1], terrains[2], terrains[0]);
-            if (triangle == null)
-                continue;
+            var (triangle, rotation) = FindTileAndRotation(terrains[2], terrains[0], terrains[1]);
             var go = Instantiate(triangle, transform);
-            go.name = $"{triangle.name} {cell} {string.Join(",", terrains)}";
             var deformation = primalMeshPrismGrid.GetDeformation(cell) * rotation;
             var meshFilter = go.GetComponent<MeshFilter>();
             meshFilter.mesh = deformation.Deform(meshFilter.mesh);
@@ -168,55 +166,14 @@ public class CellPicker : BaseGridRenderer
         return cell == selectedCell ? Color.black : null;
     }
 
-    // This is a fairly simple implementation, I'm still working on a robust version to put in
-    // Sylves
-    private static (MeshData meshData, Dictionary<int, int[]> primalFaceToDualFace) MakeDual(MeshData primalMeshData, MeshGrid primalMeshGrid = null)
-    {
-        primalMeshGrid = primalMeshGrid ?? new MeshGrid(primalMeshData);
 
-        var baseGrid = primalMeshGrid;
-        var indices = primalMeshData.indices[0];
-        var vertices = primalMeshData.vertices;
-        var dualVertices = new Vector3[indices.Length / 3];
-        for (var i = 0; i < indices.Length; i += 3)
-        {
-            var v0 = vertices[indices[i + 0]];
-            var v1 = vertices[indices[i + 1]];
-            var v2 = vertices[indices[i + 2]];
-            dualVertices[i / 3] = (v0 + v1 + v2) / 3;
-        }
-        var visited = new bool[indices.Length];
-        var dualIndices = new List<int>();
-        var primalFaceToDualFace = primalMeshGrid.GetCells().ToDictionary(x => x.x, x => new int[3]);
-        int face = 0;
-        for (var i = 0; i < indices.Length; i++)
-        {
-            if (visited[i])
-                continue;
-            var tri = i / 3;
-            var dir = i % 3;
-            var origTri = tri;
-            do
-            {
-                visited[tri * 3 + dir] = true;
-                primalFaceToDualFace[tri][(int)dir] = face;
-                dualIndices.Add(tri);
-                if (!baseGrid.TryMove(new Cell(tri, 0), (CellDir)dir, out var dest, out var inverseDir, out var _))
-                    throw new System.Exception();
-                tri = dest.x;
-                dir = ((int)inverseDir + 2) % 3;
-            }
-            while (tri != origTri);
-            dualIndices[dualIndices.Count - 1] = ~dualIndices[dualIndices.Count - 1];
-            face++;
-        }
-        var meshData = new MeshData
-        {
-            indices = new[] { dualIndices.ToArray() },
-            vertices = dualVertices,
-            subMeshCount = 1,
-            topologies = new[] { Sylves.MeshTopology.NGon },
-        };
-        return (meshData, primalFaceToDualFace);
+    private static (MeshData meshData, Dictionary<int, int[]> primalFaceToDualFace) MakeDual(MeshData primalMeshData)
+    {
+        var dmb = new Sylves.DualMeshBuilder(primalMeshData);
+
+        var primalFaceToDualFace = dmb.Mapping.GroupBy(x => x.primalFace)
+            .ToDictionary(g => g.Key, g => g.OrderBy(x => x.primalVert).Select(x => x.dualFace).ToArray());
+
+        return (dmb.DualMeshData, primalFaceToDualFace);
     }
 }
