@@ -6,18 +6,26 @@ using UnityEngine;
 
 public class Polyominoes : BaseGridRenderer
 {
+    // The grid to base the polyominoes off
     IGrid grid;
+    // All current polyominoes
     List<HashSet<Cell>> ps;
 
+    // List of buttons used
     Dictionary<GameObject, HashSet<Cell>> buttons = new Dictionary<GameObject, HashSet<Cell>>();
 
+    // These three indicate which polyomino is currently being painted
+    // pivot/rotation indicate how to position it relative to the mouse.
     HashSet<Cell> currentPolyomino = null;
     Cell currentPivot;
     CellRotation currentRotation;
 
+    // What has already been painted
     HashSet<Cell> filled = new HashSet<Cell>();
 
+    // Track what we could paint next, based on the mouse position and currentPolyomino
     HashSet<Cell> hover = new HashSet<Cell>();
+    // Are all the current hover cells empty?
     bool hoverOk;
     void Start()
     {
@@ -52,6 +60,8 @@ public class Polyominoes : BaseGridRenderer
     {
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
+        // Work out the positioning of currentPolyomino
+        // and place it into hover.
         hover.Clear();
         hoverOk = true;
         if (currentPolyomino != null)
@@ -79,6 +89,7 @@ public class Polyominoes : BaseGridRenderer
             }
         }
 
+        // Has the user clicked a button to switch currentPolyomino?
         if (Input.GetMouseButtonDown(0))
         {
             var c = Physics2D.OverlapPoint(mousePosition);
@@ -101,6 +112,7 @@ public class Polyominoes : BaseGridRenderer
             }
         }
 
+        // Right click rotates the current polyomino.
         if (Input.GetMouseButtonDown(1))
         {
             var cellType = grid.GetCellType(currentPivot);
@@ -117,6 +129,11 @@ public class Polyominoes : BaseGridRenderer
         {
             return Color.black;
         }
+        return null;
+    }
+
+    protected override Color? CellOutline(Cell cell)
+    {
         return null;
     }
     private static List<HashSet<Cell>> GetPolyominoes(IGrid grid, int size)
