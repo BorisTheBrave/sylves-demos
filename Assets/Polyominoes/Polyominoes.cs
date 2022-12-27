@@ -4,18 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Polyominoes : MonoBehaviour
+public class Polyominoes : BaseGridRenderer
 {
-    // Start is called before the first frame update
-
     IGrid grid;
     List<HashSet<Cell>> ps;
 
-    Dictionary<GameObject, HashSet<Cell>> buttons;
+    Dictionary<GameObject, HashSet<Cell>> buttons = new Dictionary<GameObject, HashSet<Cell>>();
+
+    HashSet<Cell> currentPolyomino = null;
+    Cell currentPivot;
+    CellRotation currentRotation;
+
+    HashSet<Cell> filled = new HashSet<Cell>();
+
+    HashSet<Cell> hover = new HashSet<Cell>();
+    bool hoverOk;
     void Start()
     {
+        base.Start();
         //grid = new SquareGrid(1);
-        grid = new HexGrid(1);
+        base.Grid = grid = new HexGrid(1);
         ps = GetPolyominoes(grid, 5);
         var x = 0f;
         foreach(var p in ps)
@@ -34,22 +42,83 @@ public class Polyominoes : MonoBehaviour
             var max = vertices.Aggregate(Vector3.Max);
             go.transform.position += Vector3.right * (x - min.x);
             x = go.transform.position.x + max.x + 0.5f;
+
+            buttons[go] = p;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        hover.Clear();
+        hoverOk = true;
+        if (currentPolyomino != null)
+        {
+            if (grid.FindCell(mousePosition, out var mouseCell))
+            {
+                // Translate currentPolyomino to start out mosueCell
+                var s = grid.FindGridSymmetry(
+                    new[] { currentPivot }.ToHashSet(),
+                    new[] { mouseCell }.ToHashSet(),
+                    currentPivot,
+                    currentRotation);
+                if (s != null)
+                {
+                    foreach (var cell in currentPolyomino)
+                    {
+                        grid.TryApplySymmetry(s, cell, out var dest, out var _);
+                        hover.Add(dest);
+                        if(filled.Contains(dest))
+                        {
+                            hoverOk = false;
+                        }
+                    }
+                }
+            }
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
-            var c = Physics2D.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            var c = Physics2D.OverlapPoint(mousePosition);
             if (c != null)
             {
-                Debug.Log(c.transform.parent.name);
+                var parent = c.transform.parent.gameObject;
+                currentPolyomino = buttons[parent];
+                var clicked = c.name.Replace("(", "").Replace(")", "").Split(",").Select(int.Parse).ToArray();
+                currentPivot = new Cell(clicked[0], clicked[1], clicked[2]);
+                currentRotation = grid.GetCellType(currentPivot).GetIdentity();
+                Debug.Log(currentPolyomino);
             }
+            else
+            {
+                if(hoverOk)
+                {
+                    foreach (var p in hover)
+                        filled.Add(p);
+                }
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            var cellType = grid.GetCellType(currentPivot);
+            currentRotation = cellType.Multiply(currentRotation, cellType.RotateCW);
         }
     }
 
+    protected override Color? CellColor(Cell cell)
+    {
+        if (hover.Contains(cell)) {
+            return hoverOk ? Color.green : Color.red;
+        }
+        if(filled.Contains(cell))
+        {
+            return Color.black;
+        }
+        return null;
+    }
     private static List<HashSet<Cell>> GetPolyominoes(IGrid grid, int size)
     {
         if(size == 1)
