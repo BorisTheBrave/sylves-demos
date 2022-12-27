@@ -1,0 +1,1106 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Sylves</name>
+    </assembly>
+    <members>
+        <member name="T:Sylves.DijkstraPathfinding">
+            <summary>
+            Computes Dijkstra's Algorithm.
+            </summary>
+        </member>
+        <member name="M:Sylves.Pathfinding.GetCordinateDiffMetric(Sylves.Cell,System.Single)">
+            <summary>
+            Returns a heuristic that returns the absolute difference in co-ordinates.
+            </summary>
+        </member>
+        <member name="M:Sylves.Pathfinding.GetEuclidianDistanceMetric(Sylves.IGrid,Sylves.Cell)">
+            <summary>
+            Returns a heuristict that measures the distance between cell centers.
+            </summary>
+        </member>
+        <member name="M:Sylves.Pathfinding.GetAdmissibleHeuristic(Sylves.IGrid,Sylves.Cell)">
+            <summary>
+            Returns an admissible heuristict for distances from a cell to target,
+            assuming edge distances of 1.0.
+            </summary>
+        </member>
+        <member name="T:Sylves.BiMap`2">
+            <summary>
+            Represents a 1:1 mapping between two types
+            </summary>
+        </member>
+        <member name="T:Sylves.CellSwizzle">
+            <summary>
+            Identifies a permutation of the 3 axes
+            Identical to Unity's CellSwizzle.
+            </summary>
+        </member>
+        <member name="T:Sylves.Heap`2">
+            <summary>
+            Standard binary min-heap.
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshPrimitives">
+            <summary>
+            Contains some constant meshes
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshPrimitives.ShapedPtHexPolygon(System.Single,System.Single)">
+            <summary>
+            Vertices of a pointy-topped hexagon that fits inside an origin centered rectangle of size width by height.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshPrimitives.PtHexPolygon">
+            <summary>
+            Vertices of a pointy-topped regular hexagon with unit radius and side length.
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshPrimitives.ShapedFtHexPolygon(System.Single,System.Single)">
+            <summary>
+            Vertices of a flat-topped hexagon that fits inside an origin centered rectangle of size width by height.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshPrimitives.FtHexPolygon">
+            <summary>
+            Vertices of a flat-topped polygon with unit radius and side length.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshPrimitives.Cube">
+            <summary>
+            MeshData for a unity cube centered at the origin.
+            </summary>
+        </member>
+        <member name="T:Sylves.TRS">
+            <summary>
+            Represents a position / rotation and scale.
+            Much like a Unity Transform, but without the association with a Unity object.
+            </summary>
+        </member>
+        <member name="T:Sylves.Deformation">
+            <summary>
+            A deformation is a continuous, differentable mapping from one space to another.
+            It is used to warp meshes in arbitrary ways, by mapping the vertices, normals and tangents of the mesh.
+            </summary>
+        </member>
+        <member name="M:Sylves.Deformation.Deform(UnityEngine.Mesh)">
+            <summary>
+            Deforms the vertices and normals of a mesh as specified.
+            </summary>
+        </member>
+        <member name="M:Sylves.Deformation.Transform(UnityEngine.Mesh,System.Int32)">
+            <summary>
+            Transforms the vertices and normals of a submesh mesh as specified.
+            </summary>
+        </member>
+        <member name="M:Sylves.DeformationUtils.GetDeformation(Sylves.MeshData,System.Single,System.Single,System.Boolean,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Returns a deformation that transforms from cell co-ordinates to a prism defined by the mesh and the given parameters.
+            For quad meshes, cell co-ordinates is a unit cube centered at the origin.
+            For tri meshes, cell co-ordinates are a triangle prism centered at the origin.
+            </summary>
+        </member>
+        <member name="M:Sylves.DeformationUtils.GetDeformation(Sylves.MeshData,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Returns a deformation that transforms from cell co-ordinates to a prism defined by the mesh and the given parameters.
+            For quad meshes, cell co-ordinates is a unit cube centered at the origin.
+            For tri meshes, cell co-ordinates are a triangle prism centered at the origin.
+            </summary>
+        </member>
+        <member name="T:Sylves.QuadInterpolation">
+            <summary>
+            Supplies various bilinear and trilinear interpolation methods.
+            For historic reasons, the conventions are based on a XZ plane
+            using either a unit square or unit cube.
+            </summary>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.InterpolatePosition(Sylves.MeshData,System.Int32,System.Int32,System.Boolean,System.Single,System.Single)">
+            <summary>
+            Sets up a function that does trilinear interpolation from a unit cube centered on the origin
+            to a cube made by extruding a given face of the mesh by meshOffset1 (for y=-0.5) and meshOffset2 (for y=0.5)
+            </summary>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            As the Vector3 Interpolate, only in 2 dimensions.
+            </summary>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            As the Vector3 interpolate, only in 2 dimensions.
+            </summary>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Tiilinear interpolates from a unit cube to the polyhedron supplied by v1 to v8
+            The z value of p is unused.
+            </summary>
+            <param name="v1">Final location of (-0.5, -0.5, -0.5)</param>
+            <param name="v2">Final location of (-0.5, -0.5, 0.5)</param>
+            <param name="v3">Final location of (0.5, -0.5, 0.5)</param>
+            <param name="v4">Final location of (0.5, -0.5, -0.5)</param>
+            <param name="v5">Final location of (-0.5, 0.5, -0.5)</param>
+            <param name="v6">Final location of (-0.5, 0.5, 0.5)</param>
+            <param name="v7">Final location of (0.5, 0.5, 0.5)</param>
+            <param name="v8">Final location of (0.5, 0.5, -0.5)</param>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Bilinear interpolates from a unit square in the XZ plane to the quad supplied by v1 to v4
+            The z value of p is unused.
+            </summary>
+            <param name="v1">Final location of (-0.5, 0, -0.5)</param>
+            <param name="v2">Final location of (-0.5, 0, 0.5)</param>
+            <param name="v3">Final location of (0.5, 0, 0.5)</param>
+            <param name="v4">Final location of (0.5, 0, -0.5)</param>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4)">
+            <summary>
+            As the Vector3 interpolate, only in 4 dimensions.
+            </summary>
+        </member>
+        <member name="M:Sylves.QuadInterpolation.Interpolate(UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4,UnityEngine.Vector4)">
+            <summary>
+            As the Vector3 interpolate, only in 4 dimensions.
+            </summary>
+        </member>
+        <member name="T:Sylves.TriangleInterpolation">
+            <summary>
+            Supplies various linear interpolation methods from a triangle
+            For historic reasons, the conventions are based on a XZ plane,
+            with an equilateral triangle of side sqrt(3), vertices, top, bottomright, bottomleft
+            z axis extends from -0.5 to 1.0
+            x axis from -sqrt(3)/2 to sqrt(3)/2
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleInterpolation.Interpolate(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Linear interpolates from a triangle of size Sqrt(3) in the XZ plane to the triangle supplied by v1 to v3
+            The z value of p is unused.
+            </summary>
+            <param name="v1">Final location of (0, 0, 1)</param>
+            <param name="v2">Final location of (sqrt(3) / 2, 0, -0.5)</param>
+            <param name="v3">Final location of (-sqrt(3) / 2, 0, 0.5)</param>
+        </member>
+        <member name="T:Sylves.Grid2dException">
+            <summary>
+            This exception is thrown when you call a grid method that is only appropriate for grids with 3d cells.
+            </summary>
+        </member>
+        <member name="T:Sylves.Grid3dException">
+            <summary>
+            This exception is thrown when you call a grid method that is only appropriate for grids with 2d cells.
+            </summary>
+        </member>
+        <member name="T:Sylves.GridInfiniteException">
+            <summary>
+            This exception is thrown when you call a grid method that is only appropriate for grids with a finite amount of cells.
+            </summary>
+        </member>
+        <member name="T:Sylves.Cell">
+            <summary>
+            Represents a single cell in the grid.
+            Cell is just a set of co-ordinates, the grid itself must be called to get any details about the cell.
+            For more details see the basic concepts in the docs.
+            </summary>
+        </member>
+        <member name="T:Sylves.CellDir">
+            <summary>
+            Represents a particular edge (2d) or face (3d) of a generic cell.
+            The enum is empty - to work with directions, you need to either:
+            * Use the methods on <see cref="T:Sylves.ICellType"/>.
+            * Cast to the enum specific to a given cell type, e.g. <see cref="T:Sylves.CubeDir"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.CellRotation">
+            <summary>
+            Represents a particular rotation of a generic cell.
+            Despite the name, this usually includes reflections too.
+            The enum is empty - to work with directions, you need to either:
+            * Use the methods on <see cref="T:Sylves.ICellType"/>.
+            * Cast to the enum specific to a given cell type, e.g. <see cref="T:Sylves.CubeRotation"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.XZCellTypeModifier">
+            <summary>
+            Converts a ICellType based in the XY plane to one
+            in the XZ plane. It does this by rotating Y+ to Z-  (and Z+ to Y+)
+            </summary>
+        </member>
+        <member name="T:Sylves.Connection">
+            <summary>
+            Represents how the edges (2d) or faces (3d) of cells can connect to each other.
+            In 2d, rotation/sides are unused, as two edges can only connect together normally or reflected.
+            In 3d, this represents both a rotation and reflection, similar to NGonCellType rotations.
+            As there, Mirror inverts the y-axis, and is applied before rotation, which is counter clockwise.
+            </summary>
+        </member>
+        <member name="T:Sylves.CubeBound">
+            <summary>
+            A bounding box on a regular 2d grid of squares.
+            </summary>
+        </member>
+        <member name="F:Sylves.CubeBound.min">
+            <summary>
+            Inclusive lower bound for each coordinate
+            </summary>
+        </member>
+        <member name="F:Sylves.CubeBound.max">
+            <summary>
+            Exclusive upper bound for each coordinate
+            </summary>
+        </member>
+        <member name="T:Sylves.CubeCellType">
+            <summary>
+            Handles cell information about cubes.
+            This is a 3d cell type, and it supports all 48 rotations / reflections of a cube.
+            
+            The canonical shape (for use with deformations) is a unit cube centered at the origin.
+            </summary>
+        </member>
+        <member name="T:Sylves.CubeDir">
+            <summary>
+            Enum of the 6 faces on a cube.
+            </summary>
+        </member>
+        <member name="M:Sylves.CubeDirExtensions.Up(Sylves.CubeDir)">
+            <returns>Returns (0, 1, 0) vector for most faces, and returns (0, 0, 1) for the top/bottom faces.</returns>
+        </member>
+        <member name="M:Sylves.CubeDirExtensions.Forward(Sylves.CubeDir)">
+            <returns>The normal vector for a given face.</returns>
+        </member>
+        <member name="M:Sylves.CubeDirExtensions.Right(Sylves.CubeDir)">
+            <returns>Cross product of Up() and Forward().</returns>
+        </member>
+        <member name="M:Sylves.CubeDirExtensions.Inverted(Sylves.CubeDir)">
+            <returns>Returns the face dir with the opposite normal vector.</returns>
+        </member>
+        <member name="M:Sylves.CubeGrid.GetCellCenter(Sylves.Cell)">
+            <summary>
+            Returns the center of the cell in local space
+            </summary>
+        </member>
+        <member name="M:Sylves.CubeGrid.GetTRS(Sylves.Cell)">
+            <summary>
+            Returns the appropriate transform for the cell.
+            The translation will always be to GetCellCenter.
+            Not inclusive of cell rotation, that should be applied first.
+            </summary>
+        </member>
+        <member name="T:Sylves.DefaultGridImpl">
+            <summary>
+            IGrid contains a lot of methods.
+            This class contains default implementations for several of these methods,
+            in terms of more fundamental methods of the grid.
+            These are not extension methods as the grids may implement their own implementations
+            to which have specific functionality or are more performant.
+            </summary>
+        </member>
+        <member name="T:Sylves.CubiusGrid">
+            <summary>
+            A torus with a quarter turn. Demonstrates how Sylves handles non-orientability on 3d surfaces.
+            </summary>
+        </member>
+        <member name="T:Sylves.MobiusSquareGrid">
+            <summary>
+            A square grid on a Möbius strip.
+            Demonstrates how Sylves handles non-orientability on 2d surfaces.
+            </summary>
+        </member>
+        <member name="T:Sylves.WrappingSquareGrid">
+            <summary>
+            WrapModifier applied to SquareGrid. This is a very common grid in games. 
+            </summary>
+        </member>
+        <member name="T:Sylves.NGonCellType">
+            <summary>
+            Cell type for a regular polygon with n sides.
+            The CellDirs are simply the numbers 0 to n-1 with dir 0 being to the right.
+            The CellRotations are the numbers 0 to n-1 for a CCW rotation of that many sides, 
+            plus numbers ~0 to ~(n-1) for the reflections, where rotation ~0 has dir 0 as a fix point.
+            
+            The canonical shape (for use with deformations) is a regular polygon with incircle diamater 1.0 in the XY centered at the origin, with normal pointing Z-forward.
+            </summary>
+        </member>
+        <member name="T:Sylves.NGonPrismCellType">
+            <summary>
+            Cell type for a regular polygon with n sides extended in the z-axis to a prism.
+            
+            The canonical shape (for use with deformations) is the shape for the corresponding NGonCellType, extended to +-0.5 along the z-axis.
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.Move(Sylves.IGrid,Sylves.Cell,Sylves.CellDir)">
+            <summary>
+            Returns the cell that is in the given direction from cell, or null if that move is not possible.
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.GetNeighbours(Sylves.IGrid,Sylves.Cell)">
+            <summary>
+            Returns all the cells that you can move to from a given cell.
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.Transformed(Sylves.IGrid,UnityEngine.Matrix4x4)">
+            <summary>
+            Applies a linear transformation to each of the cells of the grid.
+            <see cref="T:Sylves.TransformModifier"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.Masked(Sylves.IGrid,System.Collections.Generic.ISet{Sylves.Cell})">
+            <summary>
+            Filters the grid cells to the given subset.
+            <see cref="T:Sylves.MaskModifier"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.Masked(Sylves.IGrid,System.Func{Sylves.Cell,System.Boolean},System.Collections.Generic.IEnumerable{Sylves.Cell})">
+            <summary>
+            Filters the grid cells to the given subset.
+            <see cref="T:Sylves.MaskModifier"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.ToMeshData(Sylves.IGrid)">
+            <summary>
+            Converts a finite grid to a MeshData.
+            </summary>
+        </member>
+        <member name="T:Sylves.GridSymmetry">
+            <summary>
+            Defines a mapping that maps the cells of a grid onto themselves, potentially rotated.
+            This is used to describe reflections and rotations of a grid (as apposed to CellRotation, which
+            just talks about what you can do to a single cell alone).
+            
+            Use IGrid.TryApplySymmetry to evaluate the map.
+            
+            The mapping is *consistent* with the topology of the grid, i.e.
+            * Let s by any grid symmetry,
+            * Let a, and b be any cells, with b is a neighbour of a, in direction d.
+            * Then if ma, ra is the cell and rotation from applying s to a, and likewise mb, rb for apply s to b.
+            * Then mb is a neighbour of ma, in direciton ra * d.
+            
+            The consistency property means that the mapping are fully specified over an entire connected grid once you know how it applies
+            to a single cell. All the other cells can be computed via <see cref="M:Sylves.DefaultGridImpl.ParallelTransport(Sylves.IGrid,Sylves.Cell,Sylves.Cell,Sylves.IGrid,Sylves.Cell,Sylves.CellRotation,Sylves.Cell@,Sylves.CellRotation@)"/>.
+            
+            In practice, symmetries on regular grids can be easily computed using vector maths operations.
+            </summary>
+        </member>
+        <member name="M:Sylves.HexPrismCellDirExtensions.Up(Sylves.PTHexPrismDir)">
+            <returns>Returns (0, 0, 1) vector for most faces, and returns (0, 1, 0) for the top/bottom faces.</returns>
+        </member>
+        <member name="M:Sylves.HexPrismCellDirExtensions.Forward(Sylves.PTHexPrismDir)">
+            <returns>The normal vector for a given face.</returns>
+        </member>
+        <member name="M:Sylves.HexPrismCellDirExtensions.Inverted(Sylves.PTHexPrismDir)">
+            <returns>Returns the face dir with the opposite normal vector.</returns>
+        </member>
+        <member name="M:Sylves.HexPrismGrid.GetCellTypes">
+            <summary>
+            Returns the full list of cell types that can be returned by <see cref="M:Sylves.HexPrismGrid.GetCellType(Sylves.Cell)"/>
+            </summary>
+        </member>
+        <member name="T:Sylves.HexBound">
+            <summary>
+            Bounding boxes for cube coordinate hexes.
+            This can represent rhombuses and hex shapes drawn on the hex grid.
+            </summary>
+        </member>
+        <member name="F:Sylves.HexBound.min">
+            <summary>
+            Inclusive lower bound for each coordinate
+            </summary>
+        </member>
+        <member name="F:Sylves.HexBound.max">
+            <summary>
+            Exclusive upper bound for each coordinate
+            </summary>
+        </member>
+        <member name="M:Sylves.HexBound.Rhombus(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Returns a bound of a rhombus that bounds the X and Y axes.
+            </summary>
+        </member>
+        <member name="M:Sylves.HexBound.Hexagon(System.Int32,Sylves.Cell)">
+            <summary>
+            Returns a rough hexagonal shape of cells with a given distance of center, inclusive.
+            I.e. a radius 0 hexagon contains 1 cell, a radius 1 hexagon contains 7 cells.
+            </summary>
+        </member>
+        <member name="T:Sylves.PTHexDir">
+            <summary>
+            Values for CellDir when working with PointyTopped hexes
+            </summary>
+        </member>
+        <member name="T:Sylves.FTHexDir">
+            <summary>
+            Values for CellDir when working with FlatTopped hexes
+            </summary>
+        </member>
+        <member name="M:Sylves.HexDirExtensions.Forward(Sylves.PTHexDir)">
+            <returns>The normal vector for a given face.</returns>
+        </member>
+        <member name="M:Sylves.HexDirExtensions.Forward(Sylves.FTHexDir)">
+            <returns>The normal vector for a given face.</returns>
+        </member>
+        <member name="M:Sylves.HexDirExtensions.Inverted(Sylves.PTHexDir)">
+            <returns>Returns the face dir with the opposite normal vector.</returns>
+        </member>
+        <member name="M:Sylves.HexDirExtensions.Inverted(Sylves.FTHexDir)">
+            <returns>Returns the face dir with the opposite normal vector.</returns>
+        </member>
+        <member name="T:Sylves.HexGrid">
+            <summary>
+            A regular 2d grid of hexagons.
+            The co-ordinate system used is "Cube-cordinates described here: https://www.redblobgames.com/grids/hexagons/
+            However, it'll usually be fairly forgiving if you just use x,y and don't fill the z value.
+            See HexOrientation for more details.
+            Covers both the infinite grid, and bounded versions.
+            Related classes:
+            * <see cref="T:Sylves.FTHexDir"/>/<see cref="T:Sylves.PTHexDir"/>
+            * <see cref="T:Sylves.HexCellType"/>
+            * <see cref="T:Sylves.HexBound"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.#ctor(System.Single,Sylves.HexOrientation,Sylves.HexBound)">
+            <summary>
+            Creates a hex grid where the side length is cellSize/2.
+            I.e. the incircle diameter is cellSize * sqrt(3) / 2 and circumcircle diameter is cellSize
+            
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.#ctor(UnityEngine.Vector2,Sylves.HexOrientation,Sylves.HexBound)">
+            <summary>
+            Creates a hex grid where each hex has width and height given by cellSize.x and cellSize.y
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.WithIncircleDiameter(System.Single,Sylves.HexOrientation,Sylves.HexBound)">
+            <summary>
+            Creates a hex grid where each hex has the given incircle diameter.
+            The incircle diameter is the distance between the centers of two adjacent hexes.
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.GetCellTypes">
+            <summary>
+            Returns the full list of cell types that can be returned by <see cref="M:Sylves.HexGrid.GetCellType(Sylves.Cell)"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.GetCellCenter(Sylves.Cell)">
+            <summary>
+            Returns the center of the cell in local space
+            </summary>
+        </member>
+        <member name="M:Sylves.HexGrid.GetTRS(Sylves.Cell)">
+            <summary>
+            Returns the appropriate transform for the cell.
+            The translation will always be to GetCellCenter.
+            Not inclusive of cell rotation, that should be applied first.
+            </summary>
+        </member>
+        <member name="T:Sylves.HexRotation">
+            <summary>
+            Represents rotations / reflections of a hex
+            </summary>
+        </member>
+        <member name="T:Sylves.XZHexPrismGrid">
+            <summary>
+            Variant of HexPrismGrid that places hexes in the XZ Plane
+            </summary>
+        </member>
+        <member name="M:Sylves.ICellType.TryGetRotation(Sylves.CellDir,Sylves.CellDir,Sylves.Connection,Sylves.CellRotation@)">
+            <summary>
+            Inverse of <see cref="M:Sylves.ICellType.Rotate(Sylves.CellDir,Sylves.CellRotation,Sylves.CellDir@,Sylves.Connection@)"/>
+            </summary>
+        </member>
+        <member name="T:Sylves.IGrid">
+            <summary>
+            Contains all the methods for querying a grid.
+            A grid is a collection of cells, with each cell having various data associated with it
+            such as neighbours, position in space.
+            For more details see the basic concepts in the docs.
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.Is2D">
+            <summary>
+            True if this grid uses 2d cell types 
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.Is3D">
+            <summary>
+            True if this grid uses 3d cell types 
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IsPlanar">
+            <summary>
+            True if this grid uses 2d cell types, and all cells fit in the XY plane. 
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IsRepeating">
+            <summary>
+            True for grids that are some fixed pattern repeated over and over. 
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IsOrientable">
+            <summary>
+            True if tile connections never set Mirror to true. 
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IsFinite">
+            <summary>
+            True if there is a finite amout of cells in the grid.
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IsSingleCellType">
+            <summary>
+            True if GetCellTypes always returns a single value.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellTypes">
+            <summary>
+            Returns the full list of cell types that can be returned by <see cref="M:Sylves.IGrid.GetCellType(Sylves.Cell)"/>
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.Unbounded">
+            <summary>
+            Returns the grid with any bounds removed.
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.Unwrapped">
+            <summary>
+            Returns the grid with most grid modifiers removed.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCells">
+            <summary>
+            Gets a full list of cells in bounds.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellType(Sylves.Cell)">
+            <summary>
+            Returns the cell type associated with a given cell
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.IsCellInGrid(Sylves.Cell)">
+            <summary>
+            Returns true if the cell is in the grid (and within bounds).
+            This is one of the few methods that accepts any Cell object, most
+            other methods only work with the cells in the grid.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.TryMove(Sylves.Cell,Sylves.CellDir,Sylves.Cell@,Sylves.CellDir@,Sylves.Connection@)">
+            <summary>
+            Attempts to move from a cell in a given direction, and returns information about the move if successful.
+            </summary>
+            <param name="cell">The cell to move from</param>
+            <param name="dir">The direction to move in</param>
+            <param name="dest">The cell moved to</param>
+            <param name="inverseDir">The direction leading back from dest to cell.</param>
+            <param name="connection">A descriptor of how cell-local space relates between cell and dest.</param>
+        </member>
+        <member name="M:Sylves.IGrid.TryMoveByOffset(Sylves.Cell,UnityEngine.Vector3Int,UnityEngine.Vector3Int,Sylves.CellRotation,Sylves.Cell@,Sylves.CellRotation@)">
+            <summary>
+            Maps between cell offsets and cells in the grid.
+            This is normally done via <see cref="M:Sylves.IGrid.FindBasicPath(Sylves.Cell,Sylves.Cell)"/>, but regular grids
+            often have a more efficient implementation.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.ParallelTransport(Sylves.IGrid,Sylves.Cell,Sylves.Cell,Sylves.Cell,Sylves.CellRotation,Sylves.Cell@,Sylves.CellRotation@)">
+            <summary>
+            Given a path in aGrid from aSrcCell to aDestCell
+            follows the same path in the current grid, starting at srcCell, and with the whole path rotated by startRotation.
+            Reports the final spot that the path ends at, and it's rotation.
+            Returns false if this cannot be done (typically because an equivalent pathc annot be found in the grid).
+            
+            This method is useful for translating co-ordinates between different grids that are similarish, at least having the same celltypes.
+            For example, suppose
+              aGrid = new SquareGrid(1);
+              aSrcCell = new Cell(0, 0)
+              aDestCell = new Cell(5, 0)
+              srcCell = new Cell(100, 100)
+              startRotation = identity
+            
+            Then the path in aGrid is a straight line moving 5 units to the right,
+            and this method would attempt to move 5 units in the straight line that leads right out of (100, 100).
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellDirs(Sylves.Cell)">
+            <summary>
+            Returns directions we might expect TryMove to work for.
+            This usually just forwards to <see cref="M:Sylves.ICellType.GetCellDirs"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.FindBasicPath(Sylves.Cell,Sylves.Cell)">
+            <summary>
+            Returns a ordered series of cells and directions, starting a startCell,
+            such that moving in the given direction gives the next cell in the sequence,
+            and the final cell then moves to destCell.
+            Returns null if this is not possible.
+            This method is not indended for path finding as it lacks any customization options. It is intended
+            for algorithms that need to work between any two connected cells, as provides a "proof"
+            of connectivity.
+            
+            See pathfinding in the docs for how to actually find a path.
+            </summary>
+        </member>
+        <member name="P:Sylves.IGrid.IndexCount">
+            <summary>
+            Finds a number one larger than the maximum index for an in bounds cell.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetIndex(Sylves.Cell)">
+            <summary>
+            Finds the index associated with a given cell. 
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellByIndex(System.Int32)">
+            <summary>
+            Finds the cell associated with a given index.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetBound">
+            <summary>
+            Returns the bound currently applied to the grid.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetBound(System.Collections.Generic.IEnumerable{Sylves.Cell})">
+            <summary>
+            Returns a bound that contains all the listed cells.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.BoundBy(Sylves.IBound)">
+            <summary>
+            Returns a new grid restricted to just the given bound.
+            If the grid already has a bound, the new grid will have the intersection of both.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.IntersectBounds(Sylves.IBound,Sylves.IBound)">
+            <summary>
+            Returns a bound that contains cells included in both arguments.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.UnionBounds(Sylves.IBound,Sylves.IBound)">
+            <summary>
+            Returns a bound that contains cells included in either argument.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellsInBounds(Sylves.IBound)">
+            <summary>
+            Returns the cells inside a given bound.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.IsCellInBound(Sylves.Cell,Sylves.IBound)">
+            <summary>
+            Tests if a given cell is in bound.
+            i.e. returns true if the cell is listed in GetCellsInBounds.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellCenter(Sylves.Cell)">
+            <summary>
+            Returns the center of the cell in local space
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetTRS(Sylves.Cell)">
+            <summary>
+            Returns the appropriate transform for the cell.
+            The translation will always be to GetCellCenter,
+            rotation reflects the particular orientation of this cell
+            and the scale will reflect cell sizing.
+            GetTRS is often "best effort", there might not be an obvious
+            linear transformation from the canonical cell to the grid cell.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetDeformation(Sylves.Cell)">
+            <summary>
+            Returns a deformation mapping from the cell's co-ordinates 
+            to something that fits in the grids co-ordinates.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetPolygon(Sylves.Cell,UnityEngine.Vector3[]@,UnityEngine.Matrix4x4@)">
+            <summary>
+            For 2d cells, returns the polygon of the boundary of the cell.
+            For performance reasons, cells can share a vertices array, so you need to apply
+            a specific transform to get the polygon specific to a particular cell.
+            </summary>
+            <param name="cell"></param>
+            <param name="vertices">The vertices of the polygon. This should not be mutated.</param>
+            <param name="transform">A transformation that needs to be applied to each vertex.</param>
+        </member>
+        <member name="M:Sylves.IGrid.GetTriangleMesh(Sylves.Cell)">
+            <summary>
+            For 3d cells, returns triangles on the boundary of a given cell, and which direction they correspond to.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetMeshData(Sylves.Cell,Sylves.MeshData@,UnityEngine.Matrix4x4@)">
+            <summary>
+            For 3d cells, returns the mesh of a given cell.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.FindCell(UnityEngine.Vector3,Sylves.Cell@)">
+            <summary>
+            Finds the cell containg the give position
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.FindCell(UnityEngine.Matrix4x4,Sylves.Cell@,Sylves.CellRotation@)">
+            <summary>
+            Returns the cell and rotation corresponding to a given transform matrix.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.GetCellsIntersectsApprox(UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Gets the set of cells that potentially overlap bounds.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.Raycast(UnityEngine.Vector3,UnityEngine.Vector3,System.Single)">
+            <summary>
+            Returns the cells intersecting a ray starting at origin, of length direction.magnitude * maxDistance, in order.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.FindGridSymmetry(System.Collections.Generic.ISet{Sylves.Cell},System.Collections.Generic.ISet{Sylves.Cell},Sylves.Cell,Sylves.CellRotation)">
+            <summary>
+            Finds a GridSymmetry that:
+            1) Maps from the cells of src into dest (in any order / rotation), and
+            2) Maps srcCell using cellRotation (to any cell in dest)
+            
+            For simple, regular grids, srcCell is irrelevant, as every cell uses the same cellRotation.
+            
+            Returns null if one cannot be found. Returns an arbitrary pick if there are multiple possibilities.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.TryApplySymmetry(Sylves.GridSymmetry,Sylves.IBound,Sylves.IBound@)">
+            <summary>
+            Finds a bound that would contain all the cells of srcBound after applying the grid symmetry to them.
+            </summary>
+        </member>
+        <member name="M:Sylves.IGrid.TryApplySymmetry(Sylves.GridSymmetry,Sylves.Cell,Sylves.Cell@,Sylves.CellRotation@)">
+            <summary>
+            Applies the mapping of s to cell, and also returns the rotation
+            
+            For more details, see <see cref="T:Sylves.GridSymmetry"/>.
+            
+            For simple, regular grids, the output rotation is copied directly from <see cref="P:Sylves.GridSymmetry.Rotation"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.EdgeStore">
+            <summary>
+            Utility class represented a bundle of half edges extracted from a mesh.
+            Only unpaired half-edges are stored - any paired off edges are immediately recorded in the moves array.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshCellData.Face">
+            <summary>
+            Details of the original face that this cell derives from 
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshCellData.PrismInfo">
+            <summary>
+            For 3d cells, information about how the 2d face was extended into 3d. 
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshGrid">
+            <summary>
+            Represents a 2d grid, where each cell corresponds to a face in a given mesh.
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshGrid.IsPointInTriangle(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Returns true if p is in the triangle po, p1, p2
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshGridBuilder">
+            <summary>
+            Class contains utiliites for analysing a MeshData, specifically
+            for use with MeshGrid.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshGridOptions.UseXZPlane">
+            <summary>
+            If set, assumes the 2d plane that a face maps from is in the XZ axis.
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshGridOptions.InvertWinding">
+            <summary>
+            If false, vertices and edges of the mesh are assumed to be consistent with Sylves conventions,
+            counter clockwise winding.
+            E.g. for a quad, edges 0 => SquareDir.Right, 1 => SquareDir.Up, 2 => SquareDir.Left, 3 => SquareDir.Down
+                             verts 0 => DownRight, 1 => UpRight, 2 => UpLeft, 3=> DownLeft
+            
+            If true, the order of vertices is swapped
+            E.g. for a quad, edges 0 => Square.Left, 1 => SquareDir.Up, 2 => SquareDir.Right, 3 => SquareDir.Down
+                             verts 0 => DownLeft, 1 => UpLeft, 2=> UpRight, 3 = DownRight
+            </summary>
+        </member>
+        <member name="P:Sylves.MeshGridOptions.DoubleOddFaces">
+            <summary>
+            If set, odd faces become cells with twice as many edges.
+            It's often more convenient to work with even polygons as an about face is possible.
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshPrismGrid">
+            <summary>
+            Represents a 3d grid, where each cell is an extrusion of a face along the normals, offset to a given height.
+            </summary>
+        </member>
+        <member name="M:Sylves.PlanarMeshGrid.IsPointInTrianglePlanar(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Returns true if p is in the triangle po, p1,p2
+            Ignores the z-axis
+            </summary>
+        </member>
+        <member name="T:Sylves.BaseModifier">
+            <summary>
+            Abstract class for creating wrapper grids.
+            Wrappers defer most methods to an underlying grid.
+            </summary>
+        </member>
+        <member name="M:Sylves.BaseModifier.Rebind(Sylves.IGrid)">
+            <summary>
+            Creates a new grid applying the current wrapper to a new underlying.
+            </summary>
+        </member>
+        <member name="T:Sylves.BijectModifier">
+            <summary>
+            Remaps the cells of the grid by changing their co-ordinates,
+            without touching the position, shape or topology.
+            </summary>
+        </member>
+        <member name="T:Sylves.MaskModifier">
+            <summary>
+            Filters the cells in the the grid to a customizable subset.
+            
+            Filtered cells will not be returned by GetCells, TryMove, etc. Passing them as inputs
+            is undefined.
+            </summary>
+        </member>
+        <member name="T:Sylves.PlanarPrismModifier">
+            <summary>
+            Takes a 2d planar grid, and extends it into multiple layers along the third the dimension.
+            </summary>
+        </member>
+        <member name="T:Sylves.RavelModifier">
+            <summary>
+            Relabels all the cell co-ordinates to be 1d, i.e. cell.y and cell.z are always zero.
+            </summary>
+        </member>
+        <member name="T:Sylves.TransformModifier">
+            <summary>
+            Changes the world space positioning of the grid by a linear transform,
+            leaving everything else unchanged.
+            </summary>
+        </member>
+        <member name="T:Sylves.WrapModifier">
+            <summary>
+            Turns any bounded grid into a grid which connects back on itself when you leave the grounds. 
+            This is done via a canonicalize method that is responsible for replacing cells that are outside of the bounds.
+            </summary>
+        </member>
+        <member name="T:Sylves.XZModifier">
+            <summary>
+            Converts a IGrid based in the XY plane to one
+            in the XZ plane. It does this by rotating Y+ to Z-  (and Z+ to Y+).
+            This is different from a transform in that it doesn't rotate the cells, it applies XZCellModifier to them.
+            </summary>
+        </member>
+        <member name="T:Sylves.CairoGrid">
+            <summary>
+            Periodic 2d grid of pentagons.
+            https://en.wikipedia.org/wiki/Cairo_pentagonal_tiling
+            This is an specialization of <see cref="T:Sylves.PeriodicPlanarMeshGrid"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.PeriodicPlanarMeshGrid">
+            <summary>
+            A grid made of a repeating pattern of a given mesh, that must be planar in the XY plane.
+            The repeats are given by translation in two independent axes, strideX and strideY .
+            </summary>
+        </member>
+        <member name="T:Sylves.RhombilleGrid">
+            <summary>
+            Periodic 2d grid of diamond shapes.
+            https://en.wikipedia.org/wiki/Rhombille_tiling
+            This is an specialization of <see cref="T:Sylves.PeriodicPlanarMeshGrid"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.SquareSnubGrid">
+            <summary>
+            Periodic 2d grid of squares and triangles..
+            https://en.wikipedia.org/wiki/Snub_square_tiling
+            This is an specialization of <see cref="T:Sylves.PeriodicPlanarMeshGrid"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.TetrakisSquareGrid">
+            <summary>
+            Periodic 2d grid of triangles.
+            https://en.wikipedia.org/wiki/Tetrakis_square_tiling
+            This is an specialization of <see cref="T:Sylves.PeriodicPlanarMeshGrid"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.TriHexGrid">
+            <summary>
+            Periodic 2d grid of triangles and hexagons.
+            https://en.wikipedia.org/wiki/Trihexagonal_tiling
+            This is an specialization of <see cref="T:Sylves.PeriodicPlanarMeshGrid"/>.
+            </summary>
+        </member>
+        <member name="T:Sylves.SquareBound">
+            <summary>
+            A bounding box on a regular 2d grid of squares.
+            </summary>
+        </member>
+        <member name="F:Sylves.SquareBound.min">
+            <summary>
+            Inclusive lower bound for each coordinate
+            </summary>
+        </member>
+        <member name="F:Sylves.SquareBound.max">
+            <summary>
+            Exclusive upper bound for each coordinate
+            </summary>
+        </member>
+        <member name="T:Sylves.SquareCellType">
+            <summary>
+            Handles cell information about squares.
+            This is a a customized version of NGonCellType and behaves virtually identically.
+            
+            The canonical shape (for use with deformations) is a unit square in the XY centered at the origin, with normal pointing Z-forward.
+            </summary>
+        </member>
+        <member name="M:Sylves.SquareDirExtensions.Forward(Sylves.SquareDir)">
+            <returns>The normal vector for a given face.</returns>
+        </member>
+        <member name="M:Sylves.SquareDirExtensions.Inverted(Sylves.SquareDir)">
+            <returns>Returns the face dir with the opposite normal vector.</returns>
+        </member>
+        <member name="T:Sylves.SquareGrid">
+            <summary>
+            A regular square 2d grid.
+            Covers both the infinite grid, and bounded versions.
+            Cell (0, 0) has center at (0.5, 0.5).
+            Related classes:
+            * <see cref="T:Sylves.FTHexDir"/>/<see cref="T:Sylves.PTHexDir"/>
+            * <see cref="T:Sylves.NGonCellType"/> (with n = 6)
+            * <see cref="T:Sylves.HexBound"/>
+            </summary>
+        </member>
+        <member name="M:Sylves.SquareGrid.GetCellCenter(Sylves.Cell)">
+            <summary>
+            Returns the center of the cell in local space
+            </summary>
+        </member>
+        <member name="M:Sylves.SquareGrid.GetTRS(Sylves.Cell)">
+            <summary>
+            Returns the appropriate transform for the cell.
+            The translation will always be to GetCellCenter.
+            Not inclusive of cell rotation, that should be applied first.
+            </summary>
+        </member>
+        <member name="T:Sylves.SquareRotation">
+            <summary>
+            Represents rotations / reflections of a square
+            </summary>
+        </member>
+        <member name="T:Sylves.TriangleGrid">
+            <summary>
+            A uniform tiling of triangles.
+            TriangleOrientation.FlatSides gives columns of triangles that alternate pointing left/right.
+            TriangleOrientation.FlatTopped gives rows of triangles that alternate pointing up/down.
+            
+            In both cases, the cell type used is actually HexGridCellType. For each triangle, three of the hex directions
+            point towards neighbors, and the other three will point to nothing.
+            This is a similar setup to <see cref="P:Sylves.MeshGridOptions.DoubleOddFaces"/>, and is usually simpler to work with
+            as it doesn't force you to consider some cells as rotated by 180 degrees.
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleGrid.#ctor(System.Single,Sylves.TriangleOrientation,Sylves.TriangleBound)">
+            <summary>
+            Creates a triangle grid where each triangle is equilateral and has each side length of cellSide.
+            I.e. the incircle diameter is cellSide * sqrt(1/3) and circumcircle diameter is 2 * cellSide * sqrt(1/3)
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleGrid.#ctor(UnityEngine.Vector2,Sylves.TriangleOrientation,Sylves.TriangleBound)">
+            <summary>
+            Creates a triangle grid where each triangle has width and height given by cellSize.x and cellSize.y
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleGrid.WithIncircleDiameter(System.Single,Sylves.TriangleOrientation,Sylves.TriangleBound)">
+            <summary>
+            Creates a triangle grid where each triangle is equilateral and the given incircle diameter.
+            The incircle diameter is the distance between the centers of two adjacent triangles.
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleGrid.GetCellCenter(Sylves.Cell)">
+            <summary>
+            Returns the center of the cell in local space
+            </summary>
+        </member>
+        <member name="M:Sylves.TriangleGrid.GetTRS(Sylves.Cell)">
+            <summary>
+            Returns the appropriate transform for the cell.
+            The translation will always be to GetCellCenter.
+            Not inclusive of cell rotation, that should be applied first.
+            </summary>
+        </member>
+        <member name="T:Sylves.XZTrianglePrismGrid">
+            <summary>
+            Variant of TrianglePrismGrid that places triangles in the XZ Plane
+            </summary>
+        </member>
+        <member name="M:Sylves.ConwayOperators.Meta(Sylves.MeshData)">
+            <summary>
+            Subdivides each edge, adds a vertex in the center of each face,
+            then replaces each n-gon face with a fan of 2n triangles from the center.
+            </summary>
+        </member>
+        <member name="M:Sylves.ConwayOperators.Ortho(Sylves.MeshData)">
+            <summary>
+            Subdivides each edge, adds a vertex in the center of each face,
+            then replaces each n-gon face with a fan of n quads from the center.
+            </summary>
+        </member>
+        <member name="M:Sylves.ConwayOperators.Kis(Sylves.MeshData)">
+            <summary>
+            Adds a vertex in the center of each face,
+            then replaces each n-gon face with a fan of n triangles from the center.
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshData">
+            <summary>
+            A replacement for UnityEngine.Mesh that stores all the data in memory, for fast access from C#.
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshRaycast.RaycastSegment(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3@,System.Single@)">
+            <summary>
+            Performs a raycast in the XY plane of a ray vs a finite segment of a line.
+            z-coordinates are completely ignored.
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshRaycast.RaycastTri(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3@,System.Single@)">
+            <summary>
+            Raycasts a ray vs a single triagnle.
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshUtils">
+            <summary>
+            Utility for working with meshes.
+            </summary>
+        </member>
+        <member name="T:Sylves.MeshUtils.Face">
+            <summary>
+            References a slice of indices for a face.
+            </summary>
+        </member>
+        <member name="M:Sylves.MeshUtils.GetFaces(Sylves.MeshData,System.Int32,System.Boolean)">
+            <summary>
+            Returns the indices of the faces of a submesh of meshData.
+            </summary>
+            TODO: Should we make a low alloc version of this?
+        </member>
+        <member name="M:Sylves.MeshUtils.GetFaces(Sylves.MeshData,System.Boolean)">
+            <summary>
+            Returns the indices of the faces of meshData.
+            </summary>
+        </member>
+        <member name="T:Sylves.PrismInfo">
+            <summary>
+            Provides information about promoting a 2d cell type to a 3d cell type via extrusion.
+            
+            Usually this results in NGonPrismCellType, but squares go to CubeCellType, which has additional symmetry.
+            </summary>
+        </member>
+    </members>
+</doc>

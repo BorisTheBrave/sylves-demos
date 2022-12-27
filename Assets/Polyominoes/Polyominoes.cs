@@ -1,4 +1,3 @@
-using Assets.Common;
 using Sylves;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +10,8 @@ public class Polyominoes : MonoBehaviour
 
     IGrid grid;
     List<HashSet<Cell>> ps;
+
+    Dictionary<GameObject, HashSet<Cell>> buttons;
     void Start()
     {
         //grid = new SquareGrid(1);
@@ -19,8 +20,8 @@ public class Polyominoes : MonoBehaviour
         var x = 0f;
         foreach(var p in ps)
         {
-            Debug.Log("Found polyomino: " +string.Join("  ", p));
             var go = new GameObject();
+            go.name = string.Join("  ", p);
             var vertices = new List<Vector3>();
             foreach (var cell in p)
             {
@@ -39,7 +40,14 @@ public class Polyominoes : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            var c = Physics2D.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            if (c != null)
+            {
+                Debug.Log(c.transform.parent.name);
+            }
+        }
     }
 
     private static List<HashSet<Cell>> GetPolyominoes(IGrid grid, int size)
