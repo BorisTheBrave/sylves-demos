@@ -27,7 +27,7 @@ public class Polyominoes : BaseGridRenderer
     HashSet<Cell> hover = new HashSet<Cell>();
     // Are all the current hover cells empty?
     bool hoverOk;
-    void Start()
+    public override void Start()
     {
         base.Start();
         //grid = new SquareGrid(1);
@@ -41,7 +41,7 @@ public class Polyominoes : BaseGridRenderer
             var vertices = new List<Vector3>();
             foreach (var cell in p)
             {
-                var cellSprite = SylvesSpriteUtils.CreateSpriteShape(grid, cell);
+                var cellSprite = SylvesSpriteUtils.CreateMesh(grid, cell);
                 cellSprite.transform.parent = go.transform;
                 cellSprite.name = cell.ToString();
                 vertices.AddRange(grid.GetPolygon(cell));
@@ -100,7 +100,6 @@ public class Polyominoes : BaseGridRenderer
                 var clicked = c.name.Replace("(", "").Replace(")", "").Split(",").Select(int.Parse).ToArray();
                 currentPivot = new Cell(clicked[0], clicked[1], clicked[2]);
                 currentRotation = grid.GetCellType(currentPivot).GetIdentity();
-                Debug.Log(currentPolyomino);
             }
             else
             {

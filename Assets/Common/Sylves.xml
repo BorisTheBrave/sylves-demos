@@ -357,7 +357,7 @@
             <see cref="T:Sylves.MaskModifier"/>
             </summary>
         </member>
-        <member name="M:Sylves.GridExtensions.ToMeshData(Sylves.IGrid)">
+        <member name="M:Sylves.GridExtensions.ToMeshData(Sylves.IGrid,System.Collections.Generic.IEnumerable{Sylves.Cell})">
             <summary>
             Converts a finite grid to a MeshData.
             </summary>

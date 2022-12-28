@@ -11,6 +11,13 @@ public class SylvesSpriteUtils
 {
     // Resources
     private const string SolidFillSpriteShapeProfile = "SolidFillSpriteShapeProfile";
+    
+    private static Material m_UnlitDoubleSidedMaterial = null;
+    private static Material UnlitDoubleSidedMaterial = m_UnlitDoubleSidedMaterial
+        ?? (m_UnlitDoubleSidedMaterial = Resources.Load<Material>("UnlitDoubleSided"));
+
+
+
     public static GameObject CreateMesh(IGrid grid, Cell cell)
     {
         return CreateMesh(grid, new[] { cell }.ToHashSet());
@@ -22,9 +29,12 @@ public class SylvesSpriteUtils
         var mf = go.AddComponent<MeshFilter>();
         var mr = go.AddComponent<MeshRenderer>();
 
-        mf.mesh = grid.Masked(cells).ToMeshData().ToMesh();
+        var md = grid.Masked(cells).ToMeshData().Triangulate().InvertWinding();
+        mf.mesh = md.ToMesh();
 
-        if(collider)
+        mr.sharedMaterial = UnlitDoubleSidedMaterial;
+
+        if (collider)
         {
             AddCollider(go, grid, cells);
         }
