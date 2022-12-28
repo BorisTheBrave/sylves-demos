@@ -13,7 +13,7 @@ public class SylvesSpriteUtils
     private const string SolidFillSpriteShapeProfile = "SolidFillSpriteShapeProfile";
     
     private static Material m_UnlitDoubleSidedMaterial = null;
-    private static Material UnlitDoubleSidedMaterial = m_UnlitDoubleSidedMaterial
+    public static Material UnlitDoubleSidedMaterial = m_UnlitDoubleSidedMaterial
         ?? (m_UnlitDoubleSidedMaterial = Resources.Load<Material>("UnlitDoubleSided"));
 
 

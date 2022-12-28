@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Polyominoes : BaseGridRenderer
+public class Polyominoes : MonoBehaviour
 {
+    public ColorMap map;
+
     // The grid to base the polyominoes off
     IGrid grid;
     // All current polyominoes
@@ -27,11 +29,10 @@ public class Polyominoes : BaseGridRenderer
     HashSet<Cell> hover = new HashSet<Cell>();
     // Are all the current hover cells empty?
     bool hoverOk;
-    public override void Start()
+    public void Start()
     {
-        base.Start();
         //grid = new SquareGrid(1);
-        base.Grid = grid = new HexGrid(1);
+        map.Grid = grid = new HexGrid(1);
         ps = GetPolyominoes(grid, 5);
         var x = 0f;
         foreach(var p in ps)
@@ -60,9 +61,15 @@ public class Polyominoes : BaseGridRenderer
     {
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
+        // Clear last hover
+        foreach (var cell in hover)
+        {
+            UpdateCellColor(cell, false);
+        }
+        hover.Clear();
+
         // Work out the positioning of currentPolyomino
         // and place it into hover.
-        hover.Clear();
         hoverOk = true;
         if (currentPolyomino != null)
         {
@@ -80,13 +87,18 @@ public class Polyominoes : BaseGridRenderer
                     {
                         grid.TryApplySymmetry(s, cell, out var dest, out var _);
                         hover.Add(dest);
-                        if(filled.Contains(dest))
+                        if (filled.Contains(dest))
                         {
                             hoverOk = false;
                         }
                     }
                 }
             }
+        }
+
+        foreach (var cell in hover)
+        {
+            UpdateCellColor(cell);
         }
 
         // Has the user clicked a button to switch currentPolyomino?
@@ -106,7 +118,10 @@ public class Polyominoes : BaseGridRenderer
                 if(hoverOk)
                 {
                     foreach (var p in hover)
+                    {
                         filled.Add(p);
+                        UpdateCellColor(p);
+                    }
                 }
             }
         }
@@ -119,22 +134,20 @@ public class Polyominoes : BaseGridRenderer
         }
     }
 
-    protected override Color? CellColor(Cell cell)
+    protected void UpdateCellColor(Cell cell, bool useHover = true)
     {
-        if (hover.Contains(cell)) {
-            return hoverOk ? Color.green : Color.red;
+        if (useHover && hover.Contains(cell)) {
+            map.SetColor(cell, hoverOk ? Color.green : Color.red);
+            return;
         }
         if(filled.Contains(cell))
         {
-            return Color.black;
+            map.SetColor(cell, Color.black);
+            return;
         }
-        return null;
+        map.SetColor(cell, null);
     }
 
-    protected override Color? CellOutline(Cell cell)
-    {
-        return null;
-    }
     private static List<HashSet<Cell>> GetPolyominoes(IGrid grid, int size)
     {
         if(size == 1)
