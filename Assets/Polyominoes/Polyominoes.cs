@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Polyominoes : MonoBehaviour
+public class Polyominoes : MonoBehaviour, IPointerClickHandler
 {
     // Components
     public ColorMap map;
@@ -167,12 +168,29 @@ public class Polyominoes : MonoBehaviour
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePosition.z = 0;
 
+        // Select pivot for polyomino
+        if (Input.GetMouseButtonDown(0))
+        {
+            var c = Physics2D.OverlapPoint(mousePosition);
+            if (c != null)
+            {
+                var parent = c.transform.parent.gameObject;
+                currentPolyomino = buttons[parent];
+                var clicked = c.name.Replace("(", "").Replace(")", "").Split(",").Select(int.Parse).ToArray();
+                currentPivot = new Cell(clicked[0], clicked[1], clicked[2]);
+                currentRotation = grid.GetCellType(currentPivot).GetIdentity();
+            }
+        }
         // Clear last hover
         foreach (var cell in hover)
         {
             UpdateCellColor(cell, false);
         }
         hover.Clear();
+
+
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
 
         // Work out the positioning of currentPolyomino
         // and place it into hover.
@@ -221,27 +239,16 @@ public class Polyominoes : MonoBehaviour
             UpdateCellColor(cell);
         }
 
-        // Has the user clicked a button to switch currentPolyomino?
+
+        // Do paint
         if (Input.GetMouseButtonDown(0))
         {
-            var c = Physics2D.OverlapPoint(mousePosition);
-            if (c != null)
+            if(hoverOk)
             {
-                var parent = c.transform.parent.gameObject;
-                currentPolyomino = buttons[parent];
-                var clicked = c.name.Replace("(", "").Replace(")", "").Split(",").Select(int.Parse).ToArray();
-                currentPivot = new Cell(clicked[0], clicked[1], clicked[2]);
-                currentRotation = grid.GetCellType(currentPivot).GetIdentity();
-            }
-            else
-            {
-                if(hoverOk)
+                foreach (var p in hover)
                 {
-                    foreach (var p in hover)
-                    {
-                        filled.Add(p);
-                        UpdateCellColor(p);
-                    }
+                    filled.Add(p);
+                    UpdateCellColor(p);
                 }
             }
         }
@@ -252,6 +259,11 @@ public class Polyominoes : MonoBehaviour
             var cellType = grid.GetCellType(currentPivot);
             currentRotation = cellType.Multiply(currentRotation, cellType.RotateCW);
         }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Debug.Log("asdf");
     }
 
     protected void UpdateCellColor(Cell cell, bool useHover = true)
