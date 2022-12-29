@@ -106,7 +106,7 @@ public class ColorMap : MonoBehaviour
 
                 mpb.SetColor("_Color", color.Value);
 
-                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * polygonTransform, solidMaterial, gameObject.layer, camera, 0, mpb);
+                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * polygonTransform, SylvesSpriteUtils.UnlitDoubleSidedMaterial, gameObject.layer, camera, 0, mpb);
             }
         }
     }

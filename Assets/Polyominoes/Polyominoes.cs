@@ -2,15 +2,30 @@ using Sylves;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Polyominoes : MonoBehaviour
 {
+    // Components
     public ColorMap map;
+
+    // UI Elements
+    public TMP_Text gridText;
+    public TMP_Text polyominoSizeText;
+
+    (IGrid, string)[] allGrids = new (IGrid, string)[]
+    {
+        (new HexGrid(1), "Hex"),
+        (new SquareGrid(1), "Square"),
+        (new TriangleGrid(1), "Triangle"),
+    };
 
     // The grid to base the polyominoes off
     IGrid grid;
     // All current polyominoes
+    public int polyominoSize = 4;
     List<HashSet<Cell>> ps;
 
     // List of buttons used
@@ -31,11 +46,51 @@ public class Polyominoes : MonoBehaviour
     bool hoverOk;
     public void Start()
     {
-        //grid = new SquareGrid(1);
-        map.Grid = grid = new HexGrid(1);
-        ps = GetPolyominoes(grid, 5);
+        NextGrid(0);
+    }
+
+    public void NextGrid(int offset = 1)
+    {
+        int i;
+        for (i = 0; i < allGrids.Length; i++)
+        {
+            if (grid == allGrids[i].Item1)
+            {
+                break;
+            }
+        }
+        i = (i + offset + allGrids.Length) % allGrids.Length;
+        ResetGrid(allGrids[i].Item1, allGrids[i].Item2);
+    }
+
+    public void ChangePolyominoSize(int delta)
+    {
+        polyominoSize = Mathf.Clamp(polyominoSize + delta, 1, 6);
+        ResetPolyominoes();
+    }
+
+    public void ResetGrid(IGrid grid, string name)
+    {
+        gridText.text = name;
+        map.Clear();
+        map.Grid = this.grid = grid;
+        ResetPolyominoes();
+    }
+
+    public void ResetPolyominoes()
+    {
+        foreach (var button in buttons.Keys.ToList())
+        {
+            buttons.Remove(button);
+            Destroy(button.gameObject);
+        }
+        polyominoSizeText.text = polyominoSize.ToString();
+        ps = GetPolyominoes(grid, polyominoSize);
+        var margin = 0.5f;
         var x = 0f;
-        foreach(var p in ps)
+        var y = 0f;
+        var nextY = 0f;
+        foreach (var p in ps)
         {
             var go = new GameObject();
             go.name = string.Join("  ", p);
@@ -50,7 +105,14 @@ public class Polyominoes : MonoBehaviour
             var min = vertices.Aggregate(Vector3.Min);
             var max = vertices.Aggregate(Vector3.Max);
             go.transform.position += Vector3.right * (x - min.x);
-            x = go.transform.position.x + max.x + 0.5f;
+            go.transform.position += Vector3.up * (y - min.y);
+            x = go.transform.position.x + max.x + margin;
+            nextY = Mathf.Max(nextY, go.transform.position.y + max.y + margin);
+            if(x > 30)
+            {
+                y = nextY;
+                x = 0;
+            }
 
             buttons[go] = p;
         }
@@ -60,6 +122,7 @@ public class Polyominoes : MonoBehaviour
     void Update()
     {
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePosition.z = 0;
 
         // Clear last hover
         foreach (var cell in hover)
@@ -81,6 +144,20 @@ public class Polyominoes : MonoBehaviour
                     new[] { mouseCell }.ToHashSet(),
                     currentPivot,
                     currentRotation);
+                // Try again with a different pivot.
+                // Needed for nice behaviour on triangle grids
+                if(s == null)
+                {
+                    var otherPivot = grid.GetNeighbours(currentPivot).Intersect(currentPolyomino).Take(1).ToHashSet();
+                    if (otherPivot.Count > 0)
+                    {
+                        s = grid.FindGridSymmetry(
+                        otherPivot,
+                        new[] { mouseCell }.ToHashSet(),
+                        currentPivot,
+                        currentRotation);
+                    }
+                }
                 if (s != null)
                 {
                     foreach (var cell in currentPolyomino)
@@ -152,9 +229,10 @@ public class Polyominoes : MonoBehaviour
     {
         if(size == 1)
         {
+            grid.FindCell(Vector3.zero, out var cell);
             return new List<HashSet<Cell>>
             {
-                new HashSet<Cell> {new Cell() }
+                new HashSet<Cell> { cell }
             };
         }
 
