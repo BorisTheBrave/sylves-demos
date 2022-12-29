@@ -14,6 +14,7 @@ public class Polyominoes : MonoBehaviour
     // UI Elements
     public TMP_Text gridText;
     public TMP_Text polyominoSizeText;
+    public GameObject currentPolyominoHolder;
 
     (IGrid, string)[] allGrids = new (IGrid, string)[]
     {
@@ -62,6 +63,19 @@ public class Polyominoes : MonoBehaviour
         i = (i + offset + allGrids.Length) % allGrids.Length;
         ResetGrid(allGrids[i].Item1, allGrids[i].Item2);
     }
+    public void NextCurrentPolyomino(int offset = 1)
+    {
+        int i;
+        for (i = 0; i < ps.Count; i++)
+        {
+            if (currentPolyomino == ps[i])
+            {
+                break;
+            }
+        }
+        i = (i + offset + ps.Count) % ps.Count;
+        ResetCurrentPolyomino(ps[i], ps[i].First());
+    }
 
     public void ChangePolyominoSize(int delta)
     {
@@ -79,13 +93,11 @@ public class Polyominoes : MonoBehaviour
 
     public void ResetPolyominoes()
     {
-        foreach (var button in buttons.Keys.ToList())
-        {
-            buttons.Remove(button);
-            Destroy(button.gameObject);
-        }
         polyominoSizeText.text = polyominoSize.ToString();
         ps = GetPolyominoes(grid, polyominoSize);
+        ResetCurrentPolyomino(ps.First(), ps.First().First());
+        // Draw all the polyominoes
+        /*
         var margin = 0.5f;
         var x = 0f;
         var y = 0f;
@@ -116,6 +128,37 @@ public class Polyominoes : MonoBehaviour
 
             buttons[go] = p;
         }
+        */
+    }
+
+    public void ResetCurrentPolyomino(HashSet<Cell> currentPolyomino, Cell currentPivot)
+    {
+        this.currentPolyomino = currentPolyomino;
+        this.currentPivot = currentPivot;
+
+        foreach (var button in buttons.Keys.ToList())
+        {
+            buttons.Remove(button);
+            Destroy(button.gameObject);
+        }
+
+
+        var go = new GameObject();
+        go.name = string.Join("  ", currentPolyomino);
+        var vertices = new List<Vector3>();
+        foreach (var cell in currentPolyomino)
+        {
+            var cellSprite = SylvesSpriteUtils.CreateSpriteShape(grid, cell);
+            cellSprite.transform.parent = go.transform;
+            cellSprite.name = cell.ToString();
+            vertices.AddRange(grid.GetPolygon(cell));
+        }
+        var min = vertices.Aggregate(Vector3.Min);
+        var max = vertices.Aggregate(Vector3.Max);
+        go.transform.parent = currentPolyominoHolder.transform;
+        go.transform.position = currentPolyominoHolder.transform.position + new Vector3(-(max.x + min.x) / 2, -(max.y + min.y) / 2,0);
+
+        buttons[go] = currentPolyomino;
     }
 
     // Update is called once per frame
