@@ -46,7 +46,7 @@ public class BaseGridRenderer : MonoBehaviour
 
     private void DrawCellSolid(Cell cell, Color color)
     {
-        if (Grid.Is3D)
+        if (Grid.Is3d)
         {
             var md = Grid.GetMeshData(cell);
             GL.Begin(GL.TRIANGLES);
@@ -80,7 +80,7 @@ public class BaseGridRenderer : MonoBehaviour
 
     private void DrawCellOutline(Cell cell, Color color)
     {
-        if (Grid.Is3D)
+        if (Grid.Is3d)
         {
             var md = Grid.GetMeshData(cell);
             GL.Begin(GL.LINES);

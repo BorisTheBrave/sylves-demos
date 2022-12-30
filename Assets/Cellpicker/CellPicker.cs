@@ -40,6 +40,9 @@ public class CellPicker : BaseGridRenderer
 
     public void SetSize(int size)
     {
+        if (mesh == null)
+            throw new System.Exception("Mesh is null");
+
         var primalMeshData = new MeshData(mesh);
         //primalMeshData = ConwayOperators.Kis(primalMeshData);
 

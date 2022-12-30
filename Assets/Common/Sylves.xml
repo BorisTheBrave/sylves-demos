@@ -516,12 +516,12 @@
             For more details see the basic concepts in the docs.
             </summary>
         </member>
-        <member name="P:Sylves.IGrid.Is2D">
+        <member name="P:Sylves.IGrid.Is2d">
             <summary>
             True if this grid uses 2d cell types 
             </summary>
         </member>
-        <member name="P:Sylves.IGrid.Is3D">
+        <member name="P:Sylves.IGrid.Is3d">
             <summary>
             True if this grid uses 3d cell types 
             </summary>
