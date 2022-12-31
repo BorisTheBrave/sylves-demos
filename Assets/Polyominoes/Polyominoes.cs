@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Polyominoes : MonoBehaviour, IPointerClickHandler
+public class Polyominoes : MonoBehaviour
 {
     // Components
     public ColorMap map;
@@ -49,6 +49,7 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
     public void Start()
     {
         NextGrid(0);
+        //Autofill();
     }
 
     public void NextGrid(int offset = 1)
@@ -97,39 +98,6 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
         polyominoSizeText.text = polyominoSize.ToString();
         ps = GetPolyominoes(grid, polyominoSize);
         ResetCurrentPolyomino(ps.First(), ps.First().First());
-        // Draw all the polyominoes
-        /*
-        var margin = 0.5f;
-        var x = 0f;
-        var y = 0f;
-        var nextY = 0f;
-        foreach (var p in ps)
-        {
-            var go = new GameObject();
-            go.name = string.Join("  ", p);
-            var vertices = new List<Vector3>();
-            foreach (var cell in p)
-            {
-                var cellSprite = SylvesSpriteUtils.CreateMesh(grid, cell);
-                cellSprite.transform.parent = go.transform;
-                cellSprite.name = cell.ToString();
-                vertices.AddRange(grid.GetPolygon(cell));
-            }
-            var min = vertices.Aggregate(Vector3.Min);
-            var max = vertices.Aggregate(Vector3.Max);
-            go.transform.position += Vector3.right * (x - min.x);
-            go.transform.position += Vector3.up * (y - min.y);
-            x = go.transform.position.x + max.x + margin;
-            nextY = Mathf.Max(nextY, go.transform.position.y + max.y + margin);
-            if(x > 30)
-            {
-                y = nextY;
-                x = 0;
-            }
-
-            buttons[go] = p;
-        }
-        */
     }
 
     public void ResetCurrentPolyomino(HashSet<Cell> currentPolyomino, Cell currentPivot)
@@ -162,6 +130,40 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
         buttons[go] = currentPolyomino;
     }
 
+    public void Autofill()
+    {
+        filled.Clear();
+        map.Clear();
+        foreach(var p in ps)
+        {
+            var expanded = p.SelectMany(grid.GetNeighbours).Union(p).ToHashSet();
+            hoverOk = false;
+            // Finds cells concentrically
+            for(var w=1; w< 30 ;w++)
+            {
+                var possibleCells = grid.GetCellsIntersectsApprox(new Vector3(-w, -w), new Vector3(w, w));
+                var cells = possibleCells.Where(c =>
+                {
+                    var center = grid.GetCellCenter(c);
+                    return center.magnitude < w && center.magnitude >= w - 1;
+                });
+
+                foreach (var cell in cells)
+                {
+                    CheckHover(expanded, p.First(), grid.GetCellType(p.First()).GetIdentity(), cell);
+                    if(hoverOk)
+                    {
+                        CheckHover(p, p.First(), grid.GetCellType(p.First()).GetIdentity(), cell);
+                        FillHover();
+                        break;
+                    }
+                }
+                if (hoverOk)
+                    break;
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -192,65 +194,16 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
         if (EventSystem.current.IsPointerOverGameObject())
             return;
 
-        // Work out the positioning of currentPolyomino
-        // and place it into hover.
-        hoverOk = true;
-        if (currentPolyomino != null)
+        if (grid.FindCell(mousePosition, out var mouseCell))
         {
-            if (grid.FindCell(mousePosition, out var mouseCell))
-            {
-                // Translate currentPolyomino to start out mosueCell
-                var s = grid.FindGridSymmetry(
-                    new[] { currentPivot }.ToHashSet(),
-                    new[] { mouseCell }.ToHashSet(),
-                    currentPivot,
-                    currentRotation);
-                // Try again with a different pivot.
-                // Needed for nice behaviour on triangle grids
-                if(s == null)
-                {
-                    var otherPivot = grid.GetNeighbours(currentPivot).Intersect(currentPolyomino).Take(1).ToHashSet();
-                    if (otherPivot.Count > 0)
-                    {
-                        s = grid.FindGridSymmetry(
-                        otherPivot,
-                        new[] { mouseCell }.ToHashSet(),
-                        currentPivot,
-                        currentRotation);
-                    }
-                }
-                if (s != null)
-                {
-                    foreach (var cell in currentPolyomino)
-                    {
-                        grid.TryApplySymmetry(s, cell, out var dest, out var _);
-                        hover.Add(dest);
-                        if (filled.Contains(dest))
-                        {
-                            hoverOk = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach (var cell in hover)
-        {
-            UpdateCellColor(cell);
+            CheckHover(currentPolyomino, currentPivot, currentRotation, mouseCell);
         }
 
 
         // Do paint
         if (Input.GetMouseButtonDown(0))
         {
-            if(hoverOk)
-            {
-                foreach (var p in hover)
-                {
-                    filled.Add(p);
-                    UpdateCellColor(p);
-                }
-            }
+            FillHover();
         }
 
         // Right click rotates the current polyomino.
@@ -261,9 +214,71 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+
+    public void CheckHover(HashSet<Cell> currentPolyomino, Cell currentPivot, CellRotation currentRotation, Cell targetCell)
     {
-        Debug.Log("asdf");
+        // Clear last hover
+        foreach (var cell in hover)
+        {
+            UpdateCellColor(cell, false);
+        }
+        hover.Clear();
+
+        // Work out the positioning of currentPolyomino
+        // and place it into hover.
+        hoverOk = true;
+        if (currentPolyomino != null)
+        {
+            // Translate currentPolyomino to start out mosueCell
+            var s = grid.FindGridSymmetry(
+                new[] { currentPivot }.ToHashSet(),
+                new[] { targetCell }.ToHashSet(),
+                currentPivot,
+                currentRotation);
+            // Try again with a different pivot.
+            // Needed for nice behaviour on triangle grids
+            if (s == null)
+            {
+                var otherPivot = grid.GetNeighbours(currentPivot).Intersect(currentPolyomino).Take(1).ToHashSet();
+                if (otherPivot.Count > 0)
+                {
+                    s = grid.FindGridSymmetry(
+                    otherPivot,
+                    new[] { targetCell }.ToHashSet(),
+                    currentPivot,
+                    currentRotation);
+                }
+            }
+            if (s != null)
+            {
+                foreach (var cell in currentPolyomino)
+                {
+                    grid.TryApplySymmetry(s, cell, out var dest, out var _);
+                    hover.Add(dest);
+                    if (filled.Contains(dest))
+                    {
+                        hoverOk = false;
+                    }
+                }
+            }
+        }
+
+        foreach (var cell in hover)
+        {
+            UpdateCellColor(cell);
+        }
+    }
+
+    public void FillHover()
+    {
+        if (hoverOk)
+        {
+            foreach (var p in hover)
+            {
+                filled.Add(p);
+                UpdateCellColor(p);
+            }
+        }
     }
 
     protected void UpdateCellColor(Cell cell, bool useHover = true)
