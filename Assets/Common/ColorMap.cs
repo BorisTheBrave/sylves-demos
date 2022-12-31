@@ -7,8 +7,6 @@ using UnityEngine;
 [ExecuteAlways]
 public class ColorMap : MonoBehaviour
 {
-    const bool centralFan = true;
-
     public IGrid Grid;
 
     public Material material;
@@ -67,43 +65,7 @@ public class ColorMap : MonoBehaviour
                 Grid.GetPolygon(cell, out var polygon, out var polygonTransform);
                 if (!cachedMeshes.TryGetValue(polygon, out var mesh))
                 {
-                    cachedMeshes[polygon] = mesh = new Mesh();
-                    if (centralFan)
-                    {
-                        var center = polygon.Aggregate((x, y) => x + y) / polygon.Length;
-                        var vertices = new Vector3[polygon.Length + 1];
-                        var uvs = new Vector2[polygon.Length + 1];
-                        vertices[0] = center;
-                        uvs[0] = new Vector2();
-                        var indices = new int[polygon.Length * 3];
-                        var p = polygon.Length - 1;
-                        for (var i=0;i<polygon.Length;i++)
-                        {
-                            vertices[i + 1] = polygon[i];
-                            uvs[i + 1] = new Vector2(1, 1);
-                            var o = i * 3;
-                            indices[o + 0] = 0;
-                            indices[o + 1] = i + 1;
-                            indices[o + 2] = p + 1;
-                            p = i;
-                        }
-                        mesh.vertices = vertices;
-                        mesh.uv = uvs;
-                        mesh.triangles = indices;
-                    }
-                    else
-                    {
-                        mesh.vertices = polygon;
-                        var indices = new int[(polygon.Length - 2) * 3];
-                        for (var i = 2; i < polygon.Length; i++)
-                        {
-                            var o = (i - 2) * 3;
-                            indices[o + 0] = 0;
-                            indices[o + 1] = i;
-                            indices[o + 2] = i - 1;
-                        }
-                        mesh.triangles = indices;
-                    }
+                    cachedMeshes[polygon] = mesh = SylvesSpriteUtils.CreateStarMesh(polygon);
                     mesh.RecalculateBounds();
                     mesh.RecalculateNormals();
                 }
