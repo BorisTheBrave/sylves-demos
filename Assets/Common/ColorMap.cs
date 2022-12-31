@@ -41,7 +41,7 @@ public class ColorMap : MonoBehaviour
         // Init shader
         if(material == null)
         {
-            material = SylvesSpriteUtils.UnlitDoubleSidedMaterial;
+            material = SylvesSpriteUtils.PolygonMaterial;
         }
     }
 

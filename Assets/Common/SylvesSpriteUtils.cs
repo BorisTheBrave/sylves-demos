@@ -12,9 +12,9 @@ public class SylvesSpriteUtils
     // Resources
     private const string SolidFillSpriteShapeProfile = "SolidFillSpriteShapeProfile";
 
-    private static Material m_UnlitDoubleSidedMaterial = null;
-    public static Material UnlitDoubleSidedMaterial = m_UnlitDoubleSidedMaterial
-        ?? (m_UnlitDoubleSidedMaterial = Resources.Load<Material>("UnlitDoubleSided"));
+    private static Material m_UnlitMaterial = null;
+    public static Material UnlitMaterial = m_UnlitMaterial
+        ?? (m_UnlitMaterial = Resources.Load<Material>("UnlitMaterial"));
 
     private static Material m_PolygonMaterial = null;
     public static Material PolygonMaterial = m_PolygonMaterial
@@ -34,7 +34,7 @@ public class SylvesSpriteUtils
         var md = grid.Masked(cells).ToMeshData().Triangulate().InvertWinding();
         mf.mesh = md.ToMesh();
 
-        mr.sharedMaterial = UnlitDoubleSidedMaterial;
+        mr.sharedMaterial = UnlitMaterial;
 
         if (collider)
         {
