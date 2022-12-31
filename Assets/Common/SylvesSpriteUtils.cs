@@ -57,14 +57,14 @@ public class SylvesSpriteUtils
         var spline = c.spline;
         spline.Clear();
         var polygon = grid.GetPolygon(cell);
-        foreach (var p in polygon.Reverse())
+        foreach (var p in polygon)
         {
             spline.InsertPointAt(0, p);
             spline.SetTangentMode(0, ShapeTangentMode.Linear);
         }
-        c.RefreshSpriteShape();
         c.spriteShape = Resources.Load<SpriteShape>(SolidFillSpriteShapeProfile);
-        c.splineDetail = 1;
+        c.splineDetail = (int)QualityDetail.Low;
+        c.RefreshSpriteShape();
 
         return go;
     }
