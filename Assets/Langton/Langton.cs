@@ -8,6 +8,7 @@ public class Langton : BaseGridRenderer
     public float stepsPerSecond = 60;
     public float zoomSpeed = 0.0001f;
     public float panSpeed = 0.0001f;
+    public GameObject arrow;
 
     HashSet<Cell> blackCells = new HashSet<Cell>();
     Dictionary<Cell, int> timesVisited = new Dictionary<Cell, int>();
@@ -60,6 +61,10 @@ public class Langton : BaseGridRenderer
                 -(antPos.x - cameraPos.x) * (1 - Mathf.Exp(panSpeed)),
                 -(antPos.y - cameraPos.y) * (1 - Mathf.Exp(panSpeed)),
                 0);
+            // Adjust arrow
+            var nextCell = Grid.Move(ant.Cell, ant.Dir).Value;
+            arrow.transform.position = antPos;
+            arrow.transform.rotation = Quaternion.FromToRotation(Vector3.up, Grid.GetCellCenter(nextCell) - Grid.GetCellCenter(ant.Cell));
         }
     }
 
