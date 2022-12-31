@@ -7,10 +7,11 @@ using UnityEngine;
 [ExecuteAlways]
 public class ColorMap : MonoBehaviour
 {
+    const bool centralFan = true;
+
     public IGrid Grid;
 
-    private Material solidMaterial;
-    private Material outlineMaterial;
+    public Material material;
 
     private Dictionary<Cell, Color?> colors = new Dictionary<Cell, Color?>();
 
@@ -40,32 +41,9 @@ public class ColorMap : MonoBehaviour
     protected virtual void Start()
     {
         // Init shader
+        if(material == null)
         {
-            Shader shader = Shader.Find("Hidden/Internal-Colored");
-            solidMaterial = new Material(shader);
-            solidMaterial.enableInstancing = true;
-            solidMaterial.hideFlags = HideFlags.HideAndDontSave;
-            //Turn on alpha blending
-            solidMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            solidMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            // Turn backface culling off
-            solidMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-            // Turn off depth writes
-            //solidMaterial.SetInt("_ZWrite", 0);
-        }
-        {
-            Shader shader = Shader.Find("Hidden/Internal-Colored");
-            outlineMaterial = new Material(shader);
-            outlineMaterial.enableInstancing = true;
-            outlineMaterial.hideFlags = HideFlags.HideAndDontSave;
-            //Turn on alpha blending
-            outlineMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            outlineMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            // Turn backface culling off
-            outlineMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-            // Turn off depth writes
-            outlineMaterial.SetInt("_ZWrite", 0);
-            outlineMaterial.SetFloat("_ZBias", -1.0f);
+            material = SylvesSpriteUtils.UnlitDoubleSidedMaterial;
         }
     }
 
@@ -90,23 +68,49 @@ public class ColorMap : MonoBehaviour
                 if (!cachedMeshes.TryGetValue(polygon, out var mesh))
                 {
                     cachedMeshes[polygon] = mesh = new Mesh();
-                    mesh.vertices = polygon;
-                    var indices = new int[(polygon.Length - 2) * 3];
-                    for (var i = 2; i < polygon.Length; i++)
+                    if (centralFan)
                     {
-                        var o = (i - 2) * 3;
-                        indices[o + 0] = 0;
-                        indices[o + 1] = i;
-                        indices[o + 2] = i - 1;
+                        var center = polygon.Aggregate((x, y) => x + y) / polygon.Length;
+                        var vertices = new Vector3[polygon.Length + 1];
+                        var uvs = new Vector2[polygon.Length + 1];
+                        vertices[0] = center;
+                        uvs[0] = new Vector2();
+                        var indices = new int[polygon.Length * 3];
+                        var p = polygon.Length - 1;
+                        for (var i=0;i<polygon.Length;i++)
+                        {
+                            vertices[i + 1] = polygon[i];
+                            uvs[i + 1] = new Vector2(1, 1);
+                            var o = i * 3;
+                            indices[o + 0] = 0;
+                            indices[o + 1] = i + 1;
+                            indices[o + 2] = p + 1;
+                            p = i;
+                        }
+                        mesh.vertices = vertices;
+                        mesh.uv = uvs;
+                        mesh.triangles = indices;
                     }
-                    mesh.triangles = indices;
+                    else
+                    {
+                        mesh.vertices = polygon;
+                        var indices = new int[(polygon.Length - 2) * 3];
+                        for (var i = 2; i < polygon.Length; i++)
+                        {
+                            var o = (i - 2) * 3;
+                            indices[o + 0] = 0;
+                            indices[o + 1] = i;
+                            indices[o + 2] = i - 1;
+                        }
+                        mesh.triangles = indices;
+                    }
                     mesh.RecalculateBounds();
                     mesh.RecalculateNormals();
                 }
 
                 mpb.SetColor("_Color", color.Value);
 
-                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * polygonTransform, SylvesSpriteUtils.UnlitDoubleSidedMaterial, gameObject.layer, camera, 0, mpb);
+                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * polygonTransform, material, gameObject.layer, camera, 0, mpb);
             }
         }
     }

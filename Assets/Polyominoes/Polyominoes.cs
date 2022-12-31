@@ -274,7 +274,7 @@ public class Polyominoes : MonoBehaviour, IPointerClickHandler
         }
         if(filled.Contains(cell))
         {
-            map.SetColor(cell, Color.black);
+            map.SetColor(cell, Color.white);
             return;
         }
         map.SetColor(cell, null);
