@@ -322,6 +322,19 @@
             The canonical shape (for use with deformations) is a regular polygon with incircle diamater 1.0 in the XY centered at the origin, with normal pointing Z-forward.
             </summary>
         </member>
+        <member name="M:Sylves.NGonCellType.Get(System.Int32)">
+            <summary>
+            Returns the cell type corresponding to a polygon with n sides.
+            </summary>
+        </member>
+        <member name="M:Sylves.NGonCellType.Extract(Sylves.ICellType)">
+            <summary>
+            Returns <see cref="P:Sylves.NGonCellType.N"/> for cellType is an NGonCellType.
+            Also returns similar values for SquareCellType and HexCellType,
+            as they are compatible with NGonCellType.
+            Other celltypes return null.
+            </summary>
+        </member>
         <member name="T:Sylves.NGonPrismCellType">
             <summary>
             Cell type for a regular polygon with n sides extended in the z-axis to a prism.
@@ -337,6 +350,11 @@
         <member name="M:Sylves.GridExtensions.GetNeighbours(Sylves.IGrid,Sylves.Cell)">
             <summary>
             Returns all the cells that you can move to from a given cell.
+            </summary>
+        </member>
+        <member name="M:Sylves.GridExtensions.FindCell(Sylves.IGrid,UnityEngine.Vector3)">
+            <summary>
+            Finds the cell containg the give position
             </summary>
         </member>
         <member name="M:Sylves.GridExtensions.Transformed(Sylves.IGrid,UnityEngine.Matrix4x4)">

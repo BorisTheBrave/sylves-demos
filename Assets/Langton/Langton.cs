@@ -28,6 +28,8 @@ public class Langton : MonoBehaviour
         (new SquareGrid(1), "Square"),
         (new TriangleGrid(1), "Triangle"),
         (new RhombilleGrid(), "Rhombille"),
+        (new CairoGrid(), "Cairo"),
+        (new TriHexGrid(), "TriHex"),
     };
 
     (float, string)[] allSpeeds = new (float, string)[]
@@ -95,6 +97,7 @@ public class Langton : MonoBehaviour
         colorMap.Clear();
         blackCells.Clear();
         timesVisited.Clear();
+        maxTimesVisited = 0;
         minVisited = maxVisited = Vector3.zero;
         gridText.text = name;
         colorMap.defaultColor = Color.white;
@@ -116,23 +119,25 @@ public class Langton : MonoBehaviour
             spareTime -= timePerStep;
 
             // Do actual ant movement
-            ant.MoveForward();
-            var cell = ant.Cell;
+            var cell = Grid.Move(ant.Cell, ant.Dir).Value;
             var isCurrentCellBlack = blackCells.Contains(cell);
+            ant.MoveForward(isCurrentCellBlack);
             if (isCurrentCellBlack)
             {
-                ant.TurnRight();
-                // Turn again if there's no way forward
-                if (Grid.Move(ant.Cell, ant.Dir) == null)
+                do
+                {
                     ant.TurnRight();
+                    // Turn again if there's no way forward
+                } while (Grid.Move(ant.Cell, ant.Dir) == null);
                 blackCells.Remove(cell);
             }
             else
             {
-                ant.TurnLeft();
-                // Turn again if there's no way forward
-                if (Grid.Move(ant.Cell, ant.Dir) == null)
+                do
+                {
                     ant.TurnLeft();
+                    // Turn again if there's no way forward
+                } while (Grid.Move(ant.Cell, ant.Dir) == null);
                 blackCells.Add(cell);
             }
             // Record some statistics about the movement
@@ -142,9 +147,15 @@ public class Langton : MonoBehaviour
             minVisited = Vector3.Min(minVisited, antPos);
             maxVisited = Vector3.Max(maxVisited, antPos);
             UpdateCell(ant.Cell);
-            // Adjust arrow
+        }
+
+
+        // Adjust arrow
+        {
+            var antPos = Grid.GetCellCenter(ant.Cell);
             var nextCell = Grid.Move(ant.Cell, ant.Dir).Value;
-            arrow.transform.position = antPos;
+            var nextAntPosCell = Grid.GetCellCenter(nextCell);
+            arrow.transform.position = Vector3.Lerp(antPos, nextAntPosCell, spareTime / timePerStep);
             arrow.transform.rotation = Quaternion.FromToRotation(Vector3.up, Grid.GetCellCenter(nextCell) - Grid.GetCellCenter(ant.Cell));
         }
 
