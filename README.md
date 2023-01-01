@@ -1,6 +1,6 @@
 # Sylves Demos
 
-[Sylves](SYLVES_ROOT/) is an open source library for working with grids.
+[Sylves](https://boristhebrave.com/docs/sylves/1/) is an open source library for working with grids.
 
 This repository contains a Unity project demonstrating how to use various features in a practical setting. They typically combine *multiple* features of Sylves to produce useful effects.
 
@@ -16,10 +16,10 @@ This demo lets you edit the terrain on a planet surface. It's [inspired by](http
 
 It demonstrates 
 
-* Creating a [mesh grid](SYLVES_ROOT/articles/grids/meshgrid.html) and [mesh prism grid](SYLVES_ROOT/articles/grids/meshprismgrid.html) from a mesh.
+* Creating a [mesh grid](https://boristhebrave.com/docs/sylves/1/articles/grids/meshgrid.html) and [mesh prism grid](https://boristhebrave.com/docs/sylves/1/articles/grids/meshprismgrid.html) from a mesh.
 * How to detect where the mouse is pointing in 3d space.
 * How to do marching cubes (wang tile) style autotiling.
-* How to use [deformations](SYLVES_ROOT/articles/concepts/deformation.html) to warp tiles to fit an irregular grid.
+* How to use [deformations](https://boristhebrave.com/docs/sylves/1/articles/concepts/deformation.html) to warp tiles to fit an irregular grid.
 
 ### Controls
 
@@ -33,10 +33,10 @@ This demo lets you edit a tilemap with the mouse, and performs pathfinding on th
 
 It demonstrates:
 
-* Using the [transform modifier](SYLVES_ROOT/articles/modifiers/transformmodifier.md) to turn a square grid into an isometric grid.
+* Using the [transform modifier](https://boristhebrave.com/docs/sylves/1/articles/modifiers/transformmodifier.md) to turn a square grid into an isometric grid.
 * How to interact between Sylves and Unity's tilemap system.
 * How to detect where the mouse is pointing in 2d space.
-* How to use [pathfinding](SYLVES_ROOT/arcticles/concepts/pathfinding.html)
+* How to use [pathfinding](https://boristhebrave.com/docs/sylves/1/arcticles/concepts/pathfinding.html)
 
 ### Controls
 
@@ -46,7 +46,7 @@ Use left click to toggle a tile, and middle mouse to control the camera.
 
 <img src="Assets/Menu/langton.png" width="200"/>
 
-This demo is an animated version of the [tutorial](SYLVES_ROOT/tutorials/langton.html) showing how to implement [Langton's Ant](https://en.wikipedia.org/wiki/Langton's_ant).
+This demo is an animated version of the [tutorial](https://boristhebrave.com/docs/sylves/1/tutorials/langton.html) showing how to implement [Langton's Ant](https://en.wikipedia.org/wiki/Langton's_ant).
 
 ### Controls
 
@@ -60,7 +60,7 @@ This demo shows about placing [compound pieces](https://en.wikipedia.org/wiki/Po
 
 It demonstrates:
 
-* How to use [grid symmetry](SYLVES_ROOT/articles/concepts/grid_symmetry.html) to translate or rotate a shape on a grid.
+* How to use [grid symmetry](https://boristhebrave.com/docs/sylves/1/articles/concepts/grid_symmetry.html) to translate or rotate a shape on a grid.
 * How to write code abstractly to support any grid.
 
 
