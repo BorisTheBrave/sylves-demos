@@ -10,8 +10,9 @@ public class Langton : MonoBehaviour
     ColorMap colorMap;
     IGrid Grid => colorMap.Grid;
 
+    float stepsPerSecond = 60;
+    
     // Inspector options
-    public float stepsPerSecond = 60;
     public float zoomSpeed = 0.0001f;
     public float panSpeed = 0.0001f;
     public GameObject arrow;
@@ -28,6 +29,16 @@ public class Langton : MonoBehaviour
         (new RhombilleGrid(), "Rhombille"),
     };
 
+    (float, string)[] allSpeeds = new (float, string)[]
+    {
+        (1, "Slowest"),
+        (3, "Slow"),
+        (10, "Normal"),
+        (60, "Fast"),
+        (600, "Faster"),
+        //(6000, "Too fast"),
+    };
+
     HashSet<Cell> blackCells = new HashSet<Cell>();
     Dictionary<Cell, int> timesVisited = new Dictionary<Cell, int>();
     Cell minCellVisited;
@@ -40,6 +51,27 @@ public class Langton : MonoBehaviour
     {
         colorMap = GetComponent<ColorMap>();
         NextGrid(0);
+        ResetSpeed(allSpeeds[2].Item1, allSpeeds[2].Item2);
+    }
+
+    public void NextSpeed(int offset = 1)
+    {
+        int i;
+        for (i = 0; i < allGrids.Length; i++)
+        {
+            if (stepsPerSecond == allSpeeds[i].Item1)
+            {
+                break;
+            }
+        }
+        i = Mathf.Clamp(i + offset, 0, allSpeeds.Length - 1);
+        ResetSpeed(allSpeeds[i].Item1, allSpeeds[i].Item2);
+    }
+
+    public void ResetSpeed(float speed, string name)
+    {
+        stepsPerSecond = speed;
+        speedText.text = name;
     }
 
     public void NextGrid(int offset = 1)
@@ -80,7 +112,6 @@ public class Langton : MonoBehaviour
             spareTime -= timePerStep;
 
             // Do actual ant movement
-            Debug.Log($"{ant.Cell} {ant.Dir}");
             ant.MoveForward();
             var cell = ant.Cell;
             var isCurrentCellBlack = blackCells.Contains(cell);
