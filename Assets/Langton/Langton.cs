@@ -14,6 +14,7 @@ public class Langton : MonoBehaviour
     
     // Inspector options
     public float zoomSpeed = 0.0001f;
+    public float zoomScale= 0.5f;
     public float panSpeed = 0.0001f;
     public GameObject arrow;
 
@@ -36,13 +37,13 @@ public class Langton : MonoBehaviour
         (10, "Normal"),
         (60, "Fast"),
         (600, "Faster"),
-        //(6000, "Too fast"),
+        (6000, "Too fast"),
     };
 
     HashSet<Cell> blackCells = new HashSet<Cell>();
     Dictionary<Cell, int> timesVisited = new Dictionary<Cell, int>();
-    Cell minCellVisited;
-    Cell maxCellVisited;
+    Vector3 minVisited;
+    Vector3 maxVisited;
     int maxTimesVisited = 0;
     float spareTime = 0;
     Walker ant;
@@ -94,8 +95,11 @@ public class Langton : MonoBehaviour
         colorMap.Clear();
         blackCells.Clear();
         timesVisited.Clear();
+        minVisited = maxVisited = Vector3.zero;
         gridText.text = name;
         colorMap.defaultColor = Color.white;
+        Camera.main.transform.position = new Vector3(0, 0, -10);
+        Camera.main.orthographicSize = 10.07f;
         // Pick the cell located at the origin
         grid.FindCell(new Vector3(0, 0, 0), out var startingCell);
         var startingDir = grid.GetCellDirs(startingCell).First();
@@ -134,22 +138,26 @@ public class Langton : MonoBehaviour
             // Record some statistics about the movement
             timesVisited[ant.Cell] = timesVisited.GetValueOrDefault(ant.Cell) + 1;
             maxTimesVisited = Mathf.Max(timesVisited[ant.Cell], maxTimesVisited);
-            minCellVisited = new Cell(Mathf.Min(minCellVisited.x, cell.x), Mathf.Min(minCellVisited.y, cell.y));
-            maxCellVisited = new Cell(Mathf.Max(maxCellVisited.x, cell.x), Mathf.Max(maxCellVisited.y, cell.y));
-            UpdateCell(ant.Cell);
-            // Adjust camera
-            Camera.main.orthographicSize *= Mathf.Exp(zoomSpeed);
             var antPos = Grid.GetCellCenter(ant.Cell);
-            var cameraPos = Camera.main.transform.position;
-            Camera.main.transform.Translate(
-                -(antPos.x - cameraPos.x) * (1 - Mathf.Exp(panSpeed)),
-                -(antPos.y - cameraPos.y) * (1 - Mathf.Exp(panSpeed)),
-                0);
+            minVisited = Vector3.Min(minVisited, antPos);
+            maxVisited = Vector3.Max(maxVisited, antPos);
+            UpdateCell(ant.Cell);
             // Adjust arrow
             var nextCell = Grid.Move(ant.Cell, ant.Dir).Value;
             arrow.transform.position = antPos;
             arrow.transform.rotation = Quaternion.FromToRotation(Vector3.up, Grid.GetCellCenter(nextCell) - Grid.GetCellCenter(ant.Cell));
         }
+
+        // Adjust camera
+        var width = maxVisited - minVisited;
+        var w = Mathf.Max(width.x, width.y);
+        Camera.main.orthographicSize += (Camera.main.orthographicSize - w * zoomScale) * (1 - Mathf.Exp(zoomSpeed));
+        var desiredPos = Grid.GetCellCenter(ant.Cell);
+        var cameraPos = Camera.main.transform.position;
+        Camera.main.transform.Translate(
+            -(desiredPos.x - cameraPos.x) * (1 - Mathf.Exp(panSpeed)),
+            -(desiredPos.y - cameraPos.y) * (1 - Mathf.Exp(panSpeed)),
+            0);
 
         if (lastMaxTimeVisited != maxTimesVisited)
         {
