@@ -8,7 +8,7 @@ public class CameraPan : MonoBehaviour
 
     private Vector3? lastMousePos;
 
-    public float zoomSpeed = -0.1f;
+    public float zoomSpeed = 0.1f;
 
     public float minSize = 0.1f;
     public float maxSize = 10f;
