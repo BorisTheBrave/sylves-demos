@@ -89,6 +89,7 @@ public class Polyominoes : MonoBehaviour
     {
         gridText.text = name;
         map.Clear();
+        filled.Clear();
         map.Grid = this.grid = grid;
         ResetPolyominoes();
     }
