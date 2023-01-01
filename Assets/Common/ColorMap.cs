@@ -11,6 +11,8 @@ public class ColorMap : MonoBehaviour
 
     public Material material;
 
+    public Color? defaultColor;
+
     private Dictionary<Cell, Color?> colors = new Dictionary<Cell, Color?>();
 
 
@@ -109,5 +111,5 @@ public class ColorMap : MonoBehaviour
         }
     }
 
-    protected virtual Color? CellColor(Cell cell) => colors.GetValueOrDefault(cell);
+    protected virtual Color? CellColor(Cell cell) => colors.GetValueOrDefault(cell) ?? defaultColor;
 }

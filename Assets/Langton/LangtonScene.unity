@@ -200,6 +200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 828172199}
   - component: {fileID: 828172198}
+  - component: {fileID: 828172200}
   m_Layer: 0
   m_Name: Langton
   m_TagString: Untagged
@@ -238,6 +239,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &828172200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828172197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a489e692da3ca444826d3016d2afec9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: 39ecaece6ee480b47a06bc227962a1f2, type: 2}
 --- !u!1 &1180747809
 GameObject:
   m_ObjectHideFlags: 0
