@@ -1,6 +1,8 @@
 using Sylves;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class Langton : MonoBehaviour
@@ -8,10 +10,23 @@ public class Langton : MonoBehaviour
     ColorMap colorMap;
     IGrid Grid => colorMap.Grid;
 
+    // Inspector options
     public float stepsPerSecond = 60;
     public float zoomSpeed = 0.0001f;
     public float panSpeed = 0.0001f;
     public GameObject arrow;
+
+    // UI elements
+    public TMP_Text gridText;
+    public TMP_Text speedText;
+
+    (IGrid, string)[] allGrids = new (IGrid, string)[]
+    {
+        (new HexGrid(1), "Hex"),
+        (new SquareGrid(1), "Square"),
+        (new TriangleGrid(1), "Triangle"),
+        (new RhombilleGrid(), "Rhombille"),
+    };
 
     HashSet<Cell> blackCells = new HashSet<Cell>();
     Dictionary<Cell, int> timesVisited = new Dictionary<Cell, int>();
@@ -24,10 +39,35 @@ public class Langton : MonoBehaviour
     public void Start()
     {
         colorMap = GetComponent<ColorMap>();
-        //Grid = new SquareGrid(1);
-        colorMap.Grid = new HexGrid(1);
+        NextGrid(0);
+    }
+
+    public void NextGrid(int offset = 1)
+    {
+        int i;
+        for (i = 0; i < allGrids.Length; i++)
+        {
+            if (Grid == allGrids[i].Item1)
+            {
+                break;
+            }
+        }
+        i = (i + offset + allGrids.Length) % allGrids.Length;
+        ResetGrid(allGrids[i].Item1, allGrids[i].Item2);
+    }
+
+    public void ResetGrid(IGrid grid, string name)
+    {
+        colorMap.Grid = grid;
+        colorMap.Clear();
+        blackCells.Clear();
+        timesVisited.Clear();
+        gridText.text = name;
         colorMap.defaultColor = Color.white;
-        ant = new Walker(Grid, new Cell(0, 0), (CellDir)SquareDir.Right);
+        // Pick the cell located at the origin
+        grid.FindCell(new Vector3(0, 0, 0), out var startingCell);
+        var startingDir = grid.GetCellDirs(startingCell).First();
+        ant = new Walker(Grid, startingCell, startingDir);
     }
 
     private void Update()
@@ -40,17 +80,24 @@ public class Langton : MonoBehaviour
             spareTime -= timePerStep;
 
             // Do actual ant movement
+            Debug.Log($"{ant.Cell} {ant.Dir}");
             ant.MoveForward();
             var cell = ant.Cell;
             var isCurrentCellBlack = blackCells.Contains(cell);
             if (isCurrentCellBlack)
             {
                 ant.TurnRight();
+                // Turn again if there's no way forward
+                if (Grid.Move(ant.Cell, ant.Dir) == null)
+                    ant.TurnRight();
                 blackCells.Remove(cell);
             }
             else
             {
                 ant.TurnLeft();
+                // Turn again if there's no way forward
+                if (Grid.Move(ant.Cell, ant.Dir) == null)
+                    ant.TurnLeft();
                 blackCells.Add(cell);
             }
             // Record some statistics about the movement
