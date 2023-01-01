@@ -15,6 +15,9 @@ public class ColorMap : MonoBehaviour
 
     private Dictionary<Cell, Color?> colors = new Dictionary<Cell, Color?>();
 
+    private Dictionary<Vector3[], Mesh> cachedMeshes = new Dictionary<Vector3[], Mesh>();
+    private Dictionary<Cell, (Mesh, Matrix4x4)> cachedMeshes2 = new Dictionary<Cell, (Mesh, Matrix4x4)>();
+
 
     public void SetColor(Cell cell, Color? color)
     {
@@ -52,8 +55,44 @@ public class ColorMap : MonoBehaviour
         if (Grid == null)
             return;
 
-        // Keep this from frame to frame?
-        Dictionary<Vector3[], Mesh> cachedMeshes = new Dictionary<Vector3[], Mesh>();
+        var newCachedMeshes = new Dictionary<Vector3[], Mesh>();
+        var newCachedMeshes2 = new Dictionary<Cell, (Mesh, Matrix4x4)>();
+
+        (Mesh, Matrix4x4) GetMesh(Cell cell)
+        {
+            Mesh mesh;
+            // Lookup by cell, moving from old to new if necessary
+            if (newCachedMeshes2.ContainsKey(cell))
+                return newCachedMeshes2[cell];
+            if (cachedMeshes2.ContainsKey(cell))
+            {
+                var t = newCachedMeshes2[cell] = cachedMeshes2[cell];
+                cachedMeshes2.Remove(cell);
+                return t;
+            }
+
+            // Lookup by array, moving from old to new if necessary
+            // (this is an optimization as some Sylves grids re-use arrays for multiple cells)
+            Grid.GetPolygon(cell, out var polygon, out var polygonTransform);
+            if (newCachedMeshes.ContainsKey(polygon))
+                return (newCachedMeshes[polygon], polygonTransform);
+            if (cachedMeshes.ContainsKey(polygon))
+            {
+                mesh = newCachedMeshes[polygon] = cachedMeshes[polygon];
+                cachedMeshes.Remove(polygon);
+                return (mesh, polygonTransform);
+            }
+
+            // Nothing found
+            mesh = SylvesSpriteUtils.CreateStarMesh(polygon);
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+            newCachedMeshes[polygon] = mesh;
+            newCachedMeshes2[cell] = (mesh, polygonTransform);
+
+            return (mesh, polygonTransform);
+        }
+
 
         var mpb = new MaterialPropertyBlock();
         foreach (var camera in Camera.allCameras)
@@ -64,19 +103,17 @@ public class ColorMap : MonoBehaviour
                 if (color == null)
                     continue;
 
-                Grid.GetPolygon(cell, out var polygon, out var polygonTransform);
-                if (!cachedMeshes.TryGetValue(polygon, out var mesh))
-                {
-                    cachedMeshes[polygon] = mesh = SylvesSpriteUtils.CreateStarMesh(polygon);
-                    mesh.RecalculateBounds();
-                    mesh.RecalculateNormals();
-                }
+                var (mesh, meshTransform) = GetMesh(cell);
 
                 mpb.SetColor("_Color", color.Value);
 
-                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * polygonTransform, material, gameObject.layer, camera, 0, mpb);
+                Graphics.DrawMesh(mesh, transform.localToWorldMatrix * meshTransform, material, gameObject.layer, camera, 0, mpb);
             }
         }
+
+        // Drop anything cached that hasn't been copied over
+        cachedMeshes = newCachedMeshes;
+        cachedMeshes2 = newCachedMeshes2;
     }
 
     protected virtual IEnumerable<Cell> GetCells(Camera camera = null)
