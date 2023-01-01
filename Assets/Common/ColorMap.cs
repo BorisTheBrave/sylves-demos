@@ -39,6 +39,8 @@ public class ColorMap : MonoBehaviour
     public void Clear()
     {
         colors = new Dictionary<Cell, Color?>();
+        cachedMeshes.Clear();
+        cachedMeshes2.Clear();
     }
 
     protected virtual void Start()
