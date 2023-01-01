@@ -2,16 +2,16 @@
 /Library
 /Temp
 /Logs
-/Packages
+/UserSettings
 /*.csproj
 /*.sln
 # VS junk
 .vs
+.vsconfig
 obj
 obj.meta
 bin
 /Build
-/ProjectSettings
 **/xdoc4
 
 # Don't include source assets
@@ -22,4 +22,8 @@ bin
 *.xcf
 *.xcf.meta
 
-kenneyDungeonPack_2.3
+# Don't include packages, the user can fetch these themselves.
+/Assets/TextMesh Pro.meta
+/Assets/TextMesh Pro/
+
+kenneyDungeonPack_2.3*

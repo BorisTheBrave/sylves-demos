@@ -8,7 +8,7 @@ You can try it online at: https://boristhebrave.itch.io/sylves-demos
 
 The following demos are included:
 
-# CellPicker
+## CellPicker
 
 <img src="Assets/Menu/cellpicker.png" width="200"/>
 
@@ -25,7 +25,7 @@ It demonstrates
 
 Use left/right click to change the terrain, and middle mouse to control the camera.
 
-# Pathfinder
+## Pathfinder
 
 <img src="Assets/Menu/pathfinder.png" width="200"/>
 
@@ -42,7 +42,7 @@ It demonstrates:
 
 Use left click to toggle a tile, and middle mouse to control the camera.
 
-# Langton
+## Langton
 
 <img src="Assets/Menu/langton.png" width="200"/>
 
@@ -52,7 +52,7 @@ This demo is an animated version of the [tutorial](SYLVES_ROOT/tutorials/langton
 
 None
 
-# Polyominoes
+## Polyominoes
 
 <img src="Assets/Menu/polyomino.png" width="200"/>
 
