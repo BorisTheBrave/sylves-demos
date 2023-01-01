@@ -5,6 +5,7 @@
 /UserSettings
 /*.csproj
 /*.sln
+/Recordings
 # VS junk
 .vs
 .vsconfig
