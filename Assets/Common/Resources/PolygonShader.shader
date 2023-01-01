@@ -1,4 +1,4 @@
-Shader "Unlit/NewUnlitShader"
+Shader "Unlit/PolygonShader"
 {
     Properties
     {
@@ -19,6 +19,7 @@ Shader "Unlit/NewUnlitShader"
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
+            #pragma require derivatives
 
             #include "UnityCG.cginc"
 

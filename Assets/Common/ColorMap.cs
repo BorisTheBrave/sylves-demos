@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// This class displays the polygons of a 2d grid using Graphics.DrawMesh.
+/// It doesn't draw grid lines separately, but they can be built into
+/// the shader.
+/// </summary>
 [ExecuteAlways]
 public class ColorMap : MonoBehaviour
 {

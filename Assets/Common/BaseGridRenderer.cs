@@ -4,6 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// This class displays the polygons of a 2d grid using GL.Begin/End.
+/// It can draw aliased grid lines too.
+/// Unfortunately it draws during Unity's OnRenderObject phase
+/// so always draws on top of sprites.
+/// </summary>
 //[ExecuteAlways]
 public class BaseGridRenderer : MonoBehaviour
 {
