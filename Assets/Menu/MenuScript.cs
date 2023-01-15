@@ -9,4 +9,9 @@ public class MenuScript : MonoBehaviour
     {
         SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
+
+    public void OpenUrl(string url)
+    {
+        Application.OpenURL(url);
+    }
 }

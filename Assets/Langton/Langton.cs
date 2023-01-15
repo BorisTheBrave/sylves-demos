@@ -53,7 +53,7 @@ public class Langton : MonoBehaviour
     public void Start()
     {
         colorMap = GetComponent<ColorMap>();
-        NextGrid(0);
+        NextGrid(4);
         ResetSpeed(allSpeeds[2].Item1, allSpeeds[2].Item2);
     }
 
